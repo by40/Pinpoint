@@ -1,12 +1,13 @@
 import type { NextConfig } from "next";
 
-// Content-Security-Policy is shipped in Report-Only mode for now. Enforcing a
-// strict CSP would require either 'unsafe-inline' (which defeats the purpose) or
-// per-request nonces via middleware, which forces every static page to render
-// dynamically. Report-Only lets us surface violations from the map (MapLibre
-// blob workers, OpenFreeMap tiles) and Next's inline hydration scripts in the
-// browser console first, then promote this to an enforcing `Content-Security-Policy`.
-const cspReportOnly = [
+// Content-Security-Policy (enforcing). Verified against the live site with a
+// headless browser running a full search flow (map tiles, MapLibre blob workers,
+// Overpass fetch, Vercel Analytics) — zero violations. We keep 'unsafe-inline'
+// for script/style because Next's App Router embeds inline hydration scripts and
+// the UI uses inline styles; a nonce-based policy would force every static page
+// to render dynamically. The allowlisted directives below still block the
+// high-value vectors (object/embed, foreign connect/img, framing, base-uri).
+const csp = [
   "default-src 'self'",
   // Next.js App Router embeds inline hydration scripts; allow inline for now.
   "script-src 'self' 'unsafe-inline'",
@@ -36,7 +37,7 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "geolocation=(self), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()",
   },
-  { key: "Content-Security-Policy-Report-Only", value: cspReportOnly },
+  { key: "Content-Security-Policy", value: csp },
 ];
 
 const nextConfig: NextConfig = {

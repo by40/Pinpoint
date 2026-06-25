@@ -218,13 +218,13 @@ function SearchApp() {
             )}
 
             {error && !loading && (
-              <div className="rounded-xl p-4 bg-white border border-[#E3E1DB] text-[#57554E] text-sm">
+              <div className="rounded-xl p-4 bg-white border border-[#E3E1DB] text-[#57554E] text-sm" role="alert">
                 {error}
               </div>
             )}
 
             {hasSearched && !loading && !error && !hasResults && (
-              <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2">
+              <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2" role="status" aria-live="polite">
                 <p className="text-sm font-medium text-[#141412] mb-1">No shops found for &ldquo;{result.query}&rdquo;</p>
                 <p className="text-xs text-[#6B6A63] leading-relaxed max-w-[260px]">
                   We looked within {radiusMiles} {radiusMiles === 1 ? "mile" : "miles"}. Listings come from
@@ -244,7 +244,7 @@ function SearchApp() {
                   transition={{ duration: 0.25 }}
                   className="space-y-2"
                 >
-                  <p className="text-xs text-[#6B6A63] pb-1">
+                  <p className="text-xs text-[#6B6A63] pb-1" role="status" aria-live="polite" aria-atomic="true">
                     <span className="text-[#141412] font-semibold">{result.shops.length}</span> shops nearby
                     {matchedTags.length > 0 && (
                       <span> · {matchedTags.slice(0, 3).join(", ")}</span>

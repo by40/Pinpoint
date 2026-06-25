@@ -21,6 +21,18 @@ export default function ShopCard({ shop, index, active, onClick }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.25 }}
       onClick={onClick}
+      // The card contains its own website/phone links, so it can't be a <button>
+      // (nested interactives). Expose it as a keyboard-operable button instead.
+      role="button"
+      tabIndex={0}
+      aria-pressed={active}
+      aria-label={`${shop.name}, ${formatDistance(shop.distanceKm)} away. Select to highlight on map.`}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className={`cursor-pointer rounded-xl p-3.5 border transition-colors ${
         active
           ? "border-[#141412]/35 bg-white"

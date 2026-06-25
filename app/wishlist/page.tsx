@@ -351,6 +351,8 @@ export default function WishlistPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       className="mb-3 p-3.5 rounded-xl border border-[#E3E1DB] bg-white flex items-center justify-between"
+                      role="status"
+                      aria-live="polite"
                     >
                       <div>
                         <p className="text-sm font-semibold text-[#141412]">
@@ -386,6 +388,17 @@ export default function WishlistPage() {
                             setActiveItemId(isActive ? null : item.id);
                             setActiveShopId(null);
                           }}
+                          role="button"
+                          tabIndex={0}
+                          aria-expanded={isActive}
+                          aria-label={`${item.text}${result && !result.loading ? `, ${result.shops.length > 0 ? `${result.shops.length} shops` : "no shops"} found` : ""}. Toggle shop list.`}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setActiveItemId(isActive ? null : item.id);
+                              setActiveShopId(null);
+                            }
+                          }}
                           className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-colors ${
                             isActive
                               ? "border-[#141412]/30 bg-white"
@@ -416,6 +429,7 @@ export default function WishlistPage() {
 
                           <button
                             onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}
+                            aria-label={`Remove ${item.text}`}
                             className="shrink-0 text-[#6B6A63] hover:text-[#141412] transition-colors text-base leading-none ml-0.5"
                           >
                             ×

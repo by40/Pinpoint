@@ -19,7 +19,7 @@ function userPinEl(): HTMLDivElement {
   return el;
 }
 
-function shopPinEl(isActive: boolean): HTMLDivElement {
+function shopPinEl(isActive: boolean, label: string): HTMLDivElement {
   const el = document.createElement("div");
   const size = isActive ? 18 : 12;
   el.style.cssText = `width:${size}px;height:${size}px;background:${
@@ -27,6 +27,11 @@ function shopPinEl(isActive: boolean): HTMLDivElement {
   };border:${isActive ? "3px" : "2px"} solid ${
     isActive ? "#ffffff" : "#EAE8E3"
   };border-radius:50%;box-shadow:0 2px 6px rgba(20,20,18,0.25);cursor:pointer;transition:all 0.2s`;
+  // Keyboard-operable, labelled pin for screen readers.
+  el.setAttribute("role", "button");
+  el.setAttribute("tabindex", "0");
+  el.setAttribute("aria-label", label);
+  el.setAttribute("aria-pressed", String(isActive));
   return el;
 }
 
@@ -149,14 +154,21 @@ export default function MapView({ userLat, userLon, shops, activeShopId, onShopC
 
     shops.forEach((shop) => {
       const isActive = shop.id === activeShopId;
-      const marker = new maplibregl.Marker({ element: shopPinEl(isActive) })
+      const el = shopPinEl(isActive, `${shop.name}, ${formatDistance(shop.distanceKm)} away`);
+      const marker = new maplibregl.Marker({ element: el })
         .setLngLat([shop.lon, shop.lat])
         .setPopup(new maplibregl.Popup({ offset: 16, closeButton: false }).setHTML(popupHTML(shop)))
         .addTo(map);
 
-      marker.getElement().addEventListener("click", (e: MouseEvent) => {
+      el.addEventListener("click", (e: MouseEvent) => {
         e.stopPropagation();
         onShopClick(shop.id);
+      });
+      el.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onShopClick(shop.id);
+        }
       });
 
       markersRef.current.push(marker);
