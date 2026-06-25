@@ -1,0 +1,111 @@
+// Curated brands that get their own SEO landing page (/brand/<slug>). The `query`
+// is what we run in the live search; `examples` are deep-linked item searches.
+// Brand recognition itself lives in BRAND_MAP in ./categories — this is the
+// presentational/SEO layer.
+
+export interface FeaturedBrand {
+  name: string;
+  slug: string;
+  query: string;
+  blurb: string;
+  examples: string[];
+  /** Short label for the kind of shop that stocks it, used in copy. */
+  sells: string;
+}
+
+export const FEATURED_BRANDS: FeaturedBrand[] = [
+  { name: "Nike", slug: "nike", query: "Nike", sells: "sportswear & trainers",
+    blurb: "Nike is one of the world's biggest sportswear brands, known for trainers like the Air Max, Air Force 1 and Pegasus, plus a huge range of activewear.",
+    examples: ["Nike trainers", "Nike Air Max", "Nike Air Force 1", "Nike hoodie"] },
+  { name: "Adidas", slug: "adidas", query: "Adidas", sells: "sportswear & trainers",
+    blurb: "Adidas spans iconic trainers — Samba, Gazelle, Superstar, Campus — through to tracksuits and football kit.",
+    examples: ["Adidas Sambas", "Adidas Gazelle", "Adidas tracksuit", "Adidas trainers"] },
+  { name: "New Balance", slug: "new-balance", query: "New Balance", sells: "trainers",
+    blurb: "New Balance has become a streetwear staple thanks to models like the 550, 530 and 990 — comfort-first trainers with serious style.",
+    examples: ["New Balance 550", "New Balance 530", "New Balance trainers"] },
+  { name: "Jordan", slug: "jordan", query: "Jordan", sells: "trainers & streetwear",
+    blurb: "Air Jordan is Nike's basketball-born sneaker line, from the Jordan 1 to the latest retros, alongside Jumpman apparel.",
+    examples: ["Air Jordan 1", "Jordan trainers", "Jordan hoodie"] },
+  { name: "Converse", slug: "converse", query: "Converse", sells: "trainers",
+    blurb: "Converse makes the timeless Chuck Taylor All Star and Run Star range — canvas classics that never date.",
+    examples: ["Converse Chuck Taylor", "Converse trainers"] },
+  { name: "Vans", slug: "vans", query: "Vans", sells: "skate shoes & streetwear",
+    blurb: "Vans is the skate-rooted brand behind the Old Skool, Authentic and Sk8-Hi, plus tees and outerwear.",
+    examples: ["Vans Old Skool", "Vans trainers"] },
+  { name: "Puma", slug: "puma", query: "Puma", sells: "sportswear & trainers",
+    blurb: "Puma covers football boots, running shoes and retro trainers like the Suede and Speedcat.",
+    examples: ["Puma trainers", "Puma Suede"] },
+  { name: "Reebok", slug: "reebok", query: "Reebok", sells: "sportswear & trainers",
+    blurb: "Reebok blends gym heritage with retro trainers such as the Classic Leather and Club C.",
+    examples: ["Reebok Classic", "Reebok trainers"] },
+  { name: "ASICS", slug: "asics", query: "ASICS", sells: "running shoes",
+    blurb: "ASICS is a running-first brand, famous for the GEL cushioning line and the now-iconic GT-2160.",
+    examples: ["ASICS Gel", "ASICS running shoes"] },
+  { name: "Dr. Martens", slug: "dr-martens", query: "Dr. Martens", sells: "boots",
+    blurb: "Dr. Martens makes the air-cushioned 1460 boot and 1461 shoe — British footwear with decades of subculture history.",
+    examples: ["Dr. Martens 1460", "Dr. Martens boots"] },
+  { name: "Clarks", slug: "clarks", query: "Clarks", sells: "shoes",
+    blurb: "Clarks is a British shoe institution, from the Desert Boot and Wallabee to school shoes.",
+    examples: ["Clarks Desert Boot", "Clarks Wallabee"] },
+  { name: "Timberland", slug: "timberland", query: "Timberland", sells: "boots & outerwear",
+    blurb: "Timberland is best known for its yellow boot, alongside rugged outdoor clothing.",
+    examples: ["Timberland boots"] },
+  { name: "The North Face", slug: "the-north-face", query: "The North Face", sells: "outdoor wear",
+    blurb: "The North Face makes technical and lifestyle outerwear — the Nuptse puffer, fleeces and waterproof jackets.",
+    examples: ["North Face jacket", "North Face puffer", "North Face fleece"] },
+  { name: "Patagonia", slug: "patagonia", query: "Patagonia", sells: "outdoor wear",
+    blurb: "Patagonia makes sustainability-focused outdoor clothing, from the Better Sweater fleece to waterproof shells.",
+    examples: ["Patagonia fleece", "Patagonia jacket"] },
+  { name: "Carhartt", slug: "carhartt", query: "Carhartt", sells: "workwear & streetwear",
+    blurb: "Carhartt (and Carhartt WIP) turns hard-wearing workwear — the Detroit jacket, double-knee pants — into everyday style.",
+    examples: ["Carhartt jacket", "Carhartt pants", "Carhartt beanie"] },
+  { name: "Levi's", slug: "levis", query: "Levi's", sells: "denim",
+    blurb: "Levi's is the original denim brand — the 501, 511 and trucker jacket are wardrobe staples worldwide.",
+    examples: ["Levi's 501", "Levi's jeans", "Levi's jacket"] },
+  { name: "Wrangler", slug: "wrangler", query: "Wrangler", sells: "denim",
+    blurb: "Wrangler makes classic western-rooted denim — jeans, jackets and shirts built to last.",
+    examples: ["Wrangler jeans"] },
+  { name: "Stüssy", slug: "stussy", query: "Stüssy", sells: "streetwear",
+    blurb: "Stüssy is a foundational streetwear label, known for graphic tees, hoodies and the signature script logo.",
+    examples: ["Stüssy hoodie", "Stüssy tee"] },
+  { name: "Supreme", slug: "supreme", query: "Supreme", sells: "streetwear",
+    blurb: "Supreme is the skate-born streetwear brand famous for box-logo drops, tees and outerwear.",
+    examples: ["Supreme hoodie", "Supreme tee"] },
+  { name: "Ralph Lauren", slug: "ralph-lauren", query: "Ralph Lauren", sells: "preppy clothing",
+    blurb: "Ralph Lauren (Polo) is the home of preppy American style — polo shirts, oxford shirts and knitwear.",
+    examples: ["Ralph Lauren polo", "Polo shirt"] },
+  { name: "Tommy Hilfiger", slug: "tommy-hilfiger", query: "Tommy Hilfiger", sells: "casual clothing",
+    blurb: "Tommy Hilfiger blends classic American style with bold flag branding across tees, jackets and denim.",
+    examples: ["Tommy Hilfiger jacket", "Tommy Hilfiger tee"] },
+  { name: "Lacoste", slug: "lacoste", query: "Lacoste", sells: "casual clothing",
+    blurb: "Lacoste, with its crocodile logo, is known for tennis-rooted polo shirts, tracksuits and trainers.",
+    examples: ["Lacoste polo", "Lacoste tracksuit"] },
+  { name: "Zara", slug: "zara", query: "Zara", sells: "high-street fashion",
+    blurb: "Zara is a fast-fashion giant covering on-trend clothing for men, women and kids.",
+    examples: ["Zara dress", "Zara jacket"] },
+  { name: "H&M", slug: "hm", query: "H&M", sells: "high-street fashion",
+    blurb: "H&M offers affordable, everyday fashion and basics across a huge range.",
+    examples: ["H&M jeans", "H&M dress"] },
+  { name: "Uniqlo", slug: "uniqlo", query: "Uniqlo", sells: "wardrobe basics",
+    blurb: "Uniqlo specialises in quality essentials — the AIRism, HEATTECH and Ultra Light Down ranges.",
+    examples: ["Uniqlo jumper", "Uniqlo down jacket"] },
+  { name: "Primark", slug: "primark", query: "Primark", sells: "budget fashion",
+    blurb: "Primark is the UK's go-to for budget fashion, basics and homeware.",
+    examples: ["Primark loungewear"] },
+  { name: "Dickies", slug: "dickies", query: "Dickies", sells: "workwear",
+    blurb: "Dickies makes durable workwear — the 874 work pant and Eisenhower jacket — adopted by skate and streetwear culture.",
+    examples: ["Dickies 874", "Dickies pants"] },
+  { name: "JD Sports", slug: "jd-sports", query: "JD Sports", sells: "multi-brand sportswear",
+    blurb: "JD Sports is a major UK retailer carrying Nike, adidas, New Balance and more under one roof.",
+    examples: ["Nike trainers", "Adidas trainers"] },
+  { name: "Sports Direct", slug: "sports-direct", query: "Sports Direct", sells: "multi-brand sportswear",
+    blurb: "Sports Direct stocks a wide, value-focused range of sportswear and footwear brands.",
+    examples: ["trainers", "tracksuit"] },
+  { name: "Foot Locker", slug: "foot-locker", query: "Foot Locker", sells: "multi-brand trainers",
+    blurb: "Foot Locker is a sneaker-focused retailer carrying Nike, Jordan, adidas and more.",
+    examples: ["Nike trainers", "Jordan trainers"] },
+];
+
+export function getBrand(slug: string): FeaturedBrand | undefined {
+  return FEATURED_BRANDS.find((b) => b.slug === slug);
+}

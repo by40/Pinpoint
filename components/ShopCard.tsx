@@ -78,6 +78,16 @@ export default function ShopCard({ shop, index, active, onClick }: Props) {
           </span>
         )}
 
+        <a
+          href={`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lon}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="text-xs text-[#57554E] hover:text-[#141412] hover:underline transition-colors"
+        >
+          Directions
+        </a>
+
         {shop.website && (
           <a
             href={shop.website.startsWith("http") ? shop.website : `https://${shop.website}`}

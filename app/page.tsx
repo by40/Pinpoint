@@ -294,12 +294,29 @@ export default function LandingPage() {
               </div>
               <span className="text-sm font-semibold">Pinpoint</span>
             </div>
-            <nav className="flex items-center gap-5 text-xs text-[#57554E]">
+            <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#57554E]">
               <Link href="/search" className="hover:text-[#141412] transition-colors">Search</Link>
+              <Link href="/directory" className="hover:text-[#141412] transition-colors">Directory</Link>
+              <Link href="/about" className="hover:text-[#141412] transition-colors">About</Link>
               <Link href="/wishlist" className="hover:text-[#141412] transition-colors">Wishlist</Link>
               <Link href="/privacy" className="hover:text-[#141412] transition-colors">Privacy</Link>
               <Link href="/terms" className="hover:text-[#141412] transition-colors">Terms</Link>
             </nav>
+          </div>
+          <div className="text-xs text-[#6B6A63] leading-relaxed">
+            <span className="text-[#57554E] font-medium">Popular brands:</span>{" "}
+            {[
+              ["Nike", "nike"], ["Adidas", "adidas"], ["New Balance", "new-balance"],
+              ["Dr. Martens", "dr-martens"], ["Levi's", "levis"], ["The North Face", "the-north-face"],
+              ["Carhartt", "carhartt"], ["JD Sports", "jd-sports"],
+            ].map(([name, slug], i, arr) => (
+              <span key={slug}>
+                <Link href={`/brand/${slug}`} className="hover:text-[#141412] underline underline-offset-2 transition-colors">{name}</Link>
+                {i < arr.length - 1 ? " · " : ""}
+              </span>
+            ))}
+            {" · "}
+            <Link href="/directory" className="hover:text-[#141412] underline underline-offset-2 transition-colors">all brands & cities</Link>
           </div>
           <p className="text-xs text-[#6B6A63] leading-relaxed max-w-2xl">
             Map data ©{" "}

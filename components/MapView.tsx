@@ -32,7 +32,8 @@ function escapeHtml(s: string): string {
 
 function popupHTML(shop: Shop): string {
   const dist = `${formatDistance(shop.distanceKm)} away`;
-  return `<div style="font-family:monospace;min-width:140px"><strong style="font-size:13px;color:#141412">${escapeHtml(shop.name)}</strong><br><span style="color:#6B6A63;font-size:11px">${escapeHtml(shop.address)}</span><br><span style="color:#57554E;font-size:11px;font-weight:600">${dist}</span></div>`;
+  const dir = `https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lon}`;
+  return `<div style="font-family:monospace;min-width:150px"><strong style="font-size:13px;color:#141412">${escapeHtml(shop.name)}</strong><br><span style="color:#6B6A63;font-size:11px">${escapeHtml(shop.address)}</span><br><span style="color:#57554E;font-size:11px;font-weight:600">${dist}</span><br><a href="${dir}" target="_blank" rel="noopener noreferrer" style="color:#141412;font-size:11px;font-weight:600;text-decoration:underline">Directions →</a></div>`;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

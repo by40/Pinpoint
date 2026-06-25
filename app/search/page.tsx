@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useCallback, useRef, useMemo, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +24,7 @@ const EXAMPLE_SEARCHES = ["Nike trainers", "vintage Levi's", "North Face jacket"
 
 function SearchApp() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +32,8 @@ function SearchApp() {
   const [activeShopId, setActiveShopId] = useState<string | null>(null);
   const [matchedTags, setMatchedTags] = useState<string[]>([]);
   const [matchedBrands, setMatchedBrands] = useState<string[]>([]);
+  const [brandOnly, setBrandOnly] = useState(false);
+  const [shareLabel, setShareLabel] = useState("Share");
   const [widenedNote, setWidenedNote] = useState<string | null>(null);
   const [radiusMiles, setRadiusMiles] = useState(2);
   // Ref mirror so the stable handleSearch always reads the latest slider value.
@@ -77,6 +80,9 @@ function SearchApp() {
       setResult({ query: searchQuery, lat, lon, shops: data.shops });
       setMatchedTags(data.tags ?? []);
       setMatchedBrands(data.brands ?? []);
+      setBrandOnly(false);
+      // Reflect the query in the URL so the search is shareable/bookmarkable.
+      router.replace(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false });
       if ((data.shops?.length ?? 0) > 0) sounds.playSuccess();
       else sounds.playEmpty();
     } catch (err) {
@@ -86,7 +92,7 @@ function SearchApp() {
       sounds.stopLoadingLoop();
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   // Re-run the current search with the new radius using the coords we already
   // have — no need to re-prompt for location.
@@ -96,6 +102,36 @@ function SearchApp() {
 
   const hasResults = result && result.shops.length > 0;
   const hasSearched = result !== null;
+
+  // A shop is a confirmed stockist when its OSM brand matches a searched brand.
+  const isStockist = useCallback(
+    (s: Shop) =>
+      !!s.brand && matchedBrands.some((b) => s.brand!.toLowerCase().includes(b.toLowerCase())),
+    [matchedBrands]
+  );
+  const stockistCount = useMemo(
+    () => (result ? result.shops.filter(isStockist).length : 0),
+    [result, isStockist]
+  );
+  // What we actually render on the list + map (respects the brand-only filter).
+  const shownShops = useMemo(() => {
+    if (!result) return [];
+    return brandOnly ? result.shops.filter(isStockist) : result.shops;
+  }, [result, brandOnly, isStockist]);
+
+  async function shareSearch() {
+    if (typeof window === "undefined" || !result) return;
+    const url = `${window.location.origin}/search?q=${encodeURIComponent(result.query)}`;
+    const data = { title: "Pinpoint", text: `Find "${result.query}" in shops near you`, url };
+    try {
+      if (navigator.share) await navigator.share(data);
+      else {
+        await navigator.clipboard.writeText(url);
+        setShareLabel("Copied!");
+        setTimeout(() => setShareLabel("Share"), 1500);
+      }
+    } catch { /* user cancelled share */ }
+  }
 
   return (
     <div className="flex flex-col min-h-[100dvh] md:h-screen bg-[#F7F6F3] text-[#141412] overflow-x-hidden md:overflow-hidden">
@@ -246,20 +282,50 @@ function SearchApp() {
                   transition={{ duration: 0.25 }}
                   className="space-y-2"
                 >
-                  <p className="text-xs text-[#6B6A63] pb-1" role="status" aria-live="polite" aria-atomic="true">
-                    <span className="text-[#141412] font-semibold">{result.shops.length}</span> shops that may stock this
-                    {matchedBrands.length > 0 ? (
-                      <span> · <span className="text-[#141412]">{matchedBrands.slice(0, 3).join(", ")}</span> stockists</span>
-                    ) : matchedTags.length > 0 ? (
-                      <span> · {matchedTags.slice(0, 3).join(", ")}</span>
-                    ) : null}
-                  </p>
+                  <div className="flex items-center justify-between gap-2 pb-1">
+                    <p className="text-xs text-[#6B6A63]" role="status" aria-live="polite" aria-atomic="true">
+                      <span className="text-[#141412] font-semibold">{shownShops.length}</span>{" "}
+                      {brandOnly ? "confirmed stockists" : "shops that may stock this"}
+                      {!brandOnly && matchedBrands.length > 0 ? (
+                        <span> · <span className="text-[#141412]">{matchedBrands.slice(0, 3).join(", ")}</span></span>
+                      ) : !brandOnly && matchedTags.length > 0 ? (
+                        <span> · {matchedTags.slice(0, 3).join(", ")}</span>
+                      ) : null}
+                    </p>
+                    <button
+                      onClick={shareSearch}
+                      className="shrink-0 text-xs text-[#57554E] hover:text-[#141412] flex items-center gap-1 transition-colors"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                        <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" />
+                      </svg>
+                      {shareLabel}
+                    </button>
+                  </div>
+
+                  {matchedBrands.length > 0 && stockistCount > 0 && (
+                    <button
+                      onClick={() => setBrandOnly((v) => !v)}
+                      aria-pressed={brandOnly}
+                      className={`w-full text-xs font-medium px-3 py-2 rounded-lg border transition-colors ${
+                        brandOnly
+                          ? "bg-[#141412] text-white border-[#141412]"
+                          : "bg-white text-[#57554E] border-[#E3E1DB] hover:border-[#141412]/30 hover:text-[#141412]"
+                      }`}
+                    >
+                      {brandOnly
+                        ? `Showing ${matchedBrands.join(", ")} stores only — show all`
+                        : `Show ${matchedBrands.join(", ")} stores only (${stockistCount})`}
+                    </button>
+                  )}
+
                   {widenedNote && (
                     <p className="text-[11px] text-[#6B6A63] bg-white border border-[#E3E1DB] rounded-lg px-3 py-2">
                       {widenedNote}
                     </p>
                   )}
-                  {result.shops.map((shop, i) => (
+                  {shownShops.map((shop, i) => (
                     <ShopCard
                       key={shop.id}
                       shop={shop}
@@ -286,7 +352,7 @@ function SearchApp() {
               <MapView
                 userLat={result!.lat}
                 userLon={result!.lon}
-                shops={result!.shops}
+                shops={shownShops}
                 activeShopId={activeShopId}
                 onShopClick={(id) => setActiveShopId(id === activeShopId ? null : id)}
               />
