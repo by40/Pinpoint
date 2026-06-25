@@ -229,7 +229,19 @@ export async function queryNearbyShops(
     });
   }
 
-  shops.sort((a, b) => a.distanceKm - b.distanceKm);
+  // Rank confirmed stockists first: a shop tagged with the searched brand
+  // definitely carries it, so it's the most relevant. Everything else falls back
+  // to nearest-first. (We still can't confirm live stock for non-branded shops.)
+  const wantedBrands = resolved.brands.map((b) => b.toLowerCase());
+  const isStockist = (s: Shop) =>
+    !!s.brand && wantedBrands.some((b) => s.brand!.toLowerCase().includes(b));
+
+  shops.sort((a, b) => {
+    const aS = isStockist(a) ? 0 : 1;
+    const bS = isStockist(b) ? 0 : 1;
+    if (aS !== bS) return aS - bS;
+    return a.distanceKm - b.distanceKm;
+  });
   const capped = shops.slice(0, MAX_RESULTS);
 
   // Bound cache growth: drop the oldest entry once it gets large.

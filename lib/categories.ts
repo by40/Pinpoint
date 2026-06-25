@@ -10,6 +10,11 @@ import type { ResolvedQuery } from "./overpass";
 const ITEM_MAP: Array<{ patterns: RegExp; tags: string[] }> = [
   // Footwear
   { patterns: /\b(trainers?|sneakers?|kicks|runners?|plimsolls?)\b/i, tags: ["shoes", "sports"] },
+  // Popular sneaker model names → footwear, so "Adidas Sambas" or "Nike Air Max"
+  // search shoe/sports shops rather than every clothing shop. (Bare model
+  // numbers like "550" are intentionally excluded — they clash with jeans, e.g.
+  // "Levi's 550".)
+  { patterns: /\b(sambas?|gazelles?|superstars?|stan smiths?|forums?|spezials?|handballs?|campus|ultraboosts?|nmd|yeezys?|air ?max|air ?force|af1|air ?miler|dunks?|jordans?|blazers?|cortez|pegasus|vapormax|huaraches?|prestos?)\b/i, tags: ["shoes", "sports"] },
   { patterns: /\b(shoes?|boots?|heels?|sandals?|loafers?|brogues?|flats?|footwear|pumps?)\b/i, tags: ["shoes"] },
   { patterns: /\b(football boots?|astro|cleats?|studs?)\b/i, tags: ["sports", "shoes"] },
 
@@ -60,7 +65,7 @@ const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[] }>
   { patterns: /\b(jordan|air jordan)\b/i, brand: "Jordan", shopTypes: ["shoes", "sports", "clothes"] },
   { patterns: /\badidas\b/i, brand: "Adidas", shopTypes: ["shoes", "sports", "clothes"] },
   { patterns: /\bpuma\b/i, brand: "Puma", shopTypes: ["shoes", "sports", "clothes"] },
-  { patterns: /\b(new balance|nb)\b/i, brand: "New Balance", shopTypes: ["shoes", "sports", "clothes"] },
+  { patterns: /\b(new balance|nb)\b/i, brand: "New Balance", shopTypes: ["shoes", "sports"] },
   { patterns: /\breebok\b/i, brand: "Reebok", shopTypes: ["shoes", "sports", "clothes"] },
   { patterns: /\basics\b/i, brand: "ASICS", shopTypes: ["shoes", "sports"] },
   { patterns: /\bconverse\b/i, brand: "Converse", shopTypes: ["shoes", "clothes"] },
@@ -123,31 +128,41 @@ const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[] }>
 const FALLBACK_TYPES = ["clothes", "shoes", "boutique", "fashion_accessories"];
 
 export function resolveQuery(query: string): ResolvedQuery {
-  const shopTypes = new Set<string>();
+  const itemTypes = new Set<string>();
+  const brandTypes = new Set<string>();
   const brands = new Set<string>();
-  let matched = false;
+  let itemMatched = false;
+  let brandMatched = false;
 
   for (const { patterns, tags } of ITEM_MAP) {
     if (patterns.test(query)) {
-      matched = true;
-      tags.forEach((t) => shopTypes.add(t));
+      itemMatched = true;
+      tags.forEach((t) => itemTypes.add(t));
     }
   }
 
-  for (const { patterns, brand, shopTypes: types } of BRAND_MAP) {
+  for (const { patterns, brand, shopTypes } of BRAND_MAP) {
     if (patterns.test(query)) {
-      matched = true;
+      brandMatched = true;
       if (brand) brands.add(brand);
-      types.forEach((t) => shopTypes.add(t));
+      shopTypes.forEach((t) => brandTypes.add(t));
     }
   }
 
-  // If nothing matched, fall back to general clothing shops so any term still
-  // returns nearby clothing options; queryNearbyShops also name-searches the
-  // raw term in this case (to catch unknown brands by shop name).
-  if (!matched) {
-    FALLBACK_TYPES.forEach((t) => shopTypes.add(t));
-  }
+  // The named item constrains the shop types: "Nike trainers" should look in
+  // shoe/sportswear shops, NOT every clothes shop (Nike is a clothing brand too,
+  // which otherwise pulled in dress/lingerie shops). Only fall back to the
+  // brand's broad categories when no specific item was named (e.g. just "Nike").
+  // With no match at all, default to general clothing shops; queryNearbyShops
+  // also name-searches the raw term in that case (to catch unknown brands).
+  let shopTypes: Set<string>;
+  if (itemMatched) shopTypes = itemTypes;
+  else if (brandMatched) shopTypes = brandTypes;
+  else shopTypes = new Set(FALLBACK_TYPES);
 
-  return { shopTypes: Array.from(shopTypes), brands: Array.from(brands), matched };
+  return {
+    shopTypes: Array.from(shopTypes),
+    brands: Array.from(brands),
+    matched: itemMatched || brandMatched,
+  };
 }
