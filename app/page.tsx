@@ -271,6 +271,7 @@ export default function LandingPage() {
             <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#57554E]">
               <Link href="/search" className="hover:text-[#141412] transition-colors">Search</Link>
               <Link href="/directory" className="hover:text-[#141412] transition-colors">Directory</Link>
+              <Link href="/guides" className="hover:text-[#141412] transition-colors">Guides</Link>
               <Link href="/about" className="hover:text-[#141412] transition-colors">About</Link>
               <Link href="/wishlist" className="hover:text-[#141412] transition-colors">Wishlist</Link>
               <Link href="/privacy" className="hover:text-[#141412] transition-colors">Privacy</Link>
