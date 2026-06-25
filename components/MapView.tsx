@@ -12,26 +12,13 @@ interface Props {
   onShopClick: (id: string) => void;
 }
 
+const SHOP_SOURCE = "shops";
+const SHOP_LAYER = "shop-pins";
+
 function userPinEl(): HTMLDivElement {
   const el = document.createElement("div");
   el.style.cssText =
     "width:14px;height:14px;background:#141412;border:3px solid #ffffff;border-radius:50%;box-shadow:0 0 0 4px rgba(20,20,18,0.15)";
-  return el;
-}
-
-function shopPinEl(isActive: boolean, label: string): HTMLDivElement {
-  const el = document.createElement("div");
-  const size = isActive ? 18 : 12;
-  el.style.cssText = `width:${size}px;height:${size}px;background:${
-    isActive ? "#141412" : "#57554E"
-  };border:${isActive ? "3px" : "2px"} solid ${
-    isActive ? "#ffffff" : "#EAE8E3"
-  };border-radius:50%;box-shadow:0 2px 6px rgba(20,20,18,0.25);cursor:pointer`;
-  // Keyboard-operable, labelled pin for screen readers.
-  el.setAttribute("role", "button");
-  el.setAttribute("tabindex", "0");
-  el.setAttribute("aria-label", label);
-  el.setAttribute("aria-pressed", String(isActive));
   return el;
 }
 
@@ -48,17 +35,38 @@ function popupHTML(shop: Shop): string {
   return `<div style="font-family:monospace;min-width:140px"><strong style="font-size:13px;color:#141412">${escapeHtml(shop.name)}</strong><br><span style="color:#6B6A63;font-size:11px">${escapeHtml(shop.address)}</span><br><span style="color:#57554E;font-size:11px;font-weight:600">${dist}</span></div>`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toFeatureCollection(shops: Shop[]): any {
+  return {
+    type: "FeatureCollection",
+    features: shops.map((s) => ({
+      type: "Feature",
+      id: s.id,
+      properties: { id: s.id, name: s.name },
+      geometry: { type: "Point", coordinates: [s.lon, s.lat] },
+    })),
+  };
+}
+
 export default function MapView({ userLat, userLon, shops, activeShopId, onShopClick }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markersRef = useRef<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userMarkerRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const maplibreRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const popupRef = useRef<any>(null);
+  const prevActiveRef = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
+
+  // Keep latest props in refs so the map's (once-registered) event handlers and
+  // effects can read current values without re-binding.
+  const shopsRef = useRef(shops);
+  const onShopClickRef = useRef(onShopClick);
+  useEffect(() => { shopsRef.current = shops; }, [shops]);
+  useEffect(() => { onShopClickRef.current = onShopClick; }, [onShopClick]);
 
   // Create the map once on mount; tear it down on unmount.
   useEffect(() => {
@@ -111,7 +119,38 @@ export default function MapView({ userLat, userLon, shops, activeShopId, onShopC
           firstSymbol
         );
 
-        // User pin
+        // Shop pins rendered on the GPU (one circle layer) instead of one DOM
+        // marker per shop — stays smooth with many pins on the pitched 3D map.
+        // promoteId lets us drive the active/selected style via feature-state.
+        map.addSource(SHOP_SOURCE, {
+          type: "geojson",
+          data: toFeatureCollection(shopsRef.current),
+          promoteId: "id",
+        });
+        const active = ["boolean", ["feature-state", "active"], false];
+        map.addLayer({
+          id: SHOP_LAYER,
+          type: "circle",
+          source: SHOP_SOURCE,
+          paint: {
+            "circle-radius": ["case", active, 8, 5],
+            "circle-color": ["case", active, "#141412", "#57554E"],
+            "circle-stroke-width": ["case", active, 3, 2],
+            "circle-stroke-color": ["case", active, "#ffffff", "#EAE8E3"],
+          },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any);
+
+        popupRef.current = new maplibregl.Popup({ offset: 14, closeButton: false });
+
+        map.on("click", SHOP_LAYER, (e: { features?: Array<{ properties?: { id?: string } }> }) => {
+          const id = e.features?.[0]?.properties?.id;
+          if (id) onShopClickRef.current(id);
+        });
+        map.on("mouseenter", SHOP_LAYER, () => { map.getCanvas().style.cursor = "pointer"; });
+        map.on("mouseleave", SHOP_LAYER, () => { map.getCanvas().style.cursor = ""; });
+
+        // User pin (a single DOM marker is cheap).
         userMarkerRef.current = new maplibregl.Marker({ element: userPinEl() })
           .setLngLat([userLon, userLat])
           .setPopup(new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML("You are here"))
@@ -127,7 +166,7 @@ export default function MapView({ userLat, userLon, shops, activeShopId, onShopC
         mapRef.current.remove();
         mapRef.current = null;
         userMarkerRef.current = null;
-        markersRef.current = [];
+        popupRef.current = null;
       }
     };
   // Map is created once; location/shops handled by the effects below.
@@ -142,54 +181,44 @@ export default function MapView({ userLat, userLon, shops, activeShopId, onShopC
     map.easeTo({ center: [userLon, userLat] });
   }, [userLon, userLat, ready]);
 
-  // Render shop markers when the result set or selection changes.
+  // Push the result set into the GPU source and frame it.
   useEffect(() => {
     const map = mapRef.current;
     const maplibregl = maplibreRef.current;
     if (!ready || !map || !maplibregl) return;
 
-    // Clear previous markers
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
+    const source = map.getSource(SHOP_SOURCE);
+    if (source) source.setData(toFeatureCollection(shops));
 
-    shops.forEach((shop) => {
-      const isActive = shop.id === activeShopId;
-      const el = shopPinEl(isActive, `${shop.name}, ${formatDistance(shop.distanceKm)} away`);
-      const marker = new maplibregl.Marker({ element: el })
-        .setLngLat([shop.lon, shop.lat])
-        .setPopup(new maplibregl.Popup({ offset: 16, closeButton: false }).setHTML(popupHTML(shop)))
-        .addTo(map);
-
-      el.addEventListener("click", (e: MouseEvent) => {
-        e.stopPropagation();
-        onShopClick(shop.id);
-      });
-      el.addEventListener("keydown", (e: KeyboardEvent) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onShopClick(shop.id);
-        }
-      });
-
-      markersRef.current.push(marker);
-    });
-
-    // Frame all results, keeping the 3D tilt and not over-zooming on tight sets.
     if (shops.length > 0) {
       const bounds = new maplibregl.LngLatBounds();
       shops.forEach((s) => bounds.extend([s.lon, s.lat]));
       map.fitBounds(bounds, { padding: 56, maxZoom: 16, pitch: 45, duration: 600 });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shops, activeShopId, ready]);
+  }, [shops, ready]);
 
-  // Pan to the active shop.
+  // Reflect the active selection: update feature-state, pan, and show the popup.
   useEffect(() => {
     const map = mapRef.current;
-    if (!ready || !map || !activeShopId) return;
-    const shop = shops.find((s) => s.id === activeShopId);
-    if (shop) map.easeTo({ center: [shop.lon, shop.lat] });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!ready || !map) return;
+
+    const prev = prevActiveRef.current;
+    if (prev && prev !== activeShopId) {
+      try { map.setFeatureState({ source: SHOP_SOURCE, id: prev }, { active: false }); } catch { /* feature gone */ }
+    }
+
+    if (activeShopId) {
+      try { map.setFeatureState({ source: SHOP_SOURCE, id: activeShopId }, { active: true }); } catch { /* not loaded yet */ }
+      const shop = shopsRef.current.find((s) => s.id === activeShopId);
+      if (shop) {
+        map.easeTo({ center: [shop.lon, shop.lat] });
+        popupRef.current?.setLngLat([shop.lon, shop.lat]).setHTML(popupHTML(shop)).addTo(map);
+      }
+    } else {
+      popupRef.current?.remove();
+    }
+
+    prevActiveRef.current = activeShopId;
   }, [activeShopId, ready]);
 
   return <div ref={containerRef} className="w-full h-full rounded-xl overflow-hidden" />;
