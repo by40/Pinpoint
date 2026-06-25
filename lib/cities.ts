@@ -30,6 +30,23 @@ export const CITIES: City[] = [
   { name: "York", slug: "york", lat: 53.9590, lon: -1.0815 },
   { name: "Belfast", slug: "belfast", lat: 54.5973, lon: -5.9301 },
   { name: "Southampton", slug: "southampton", lat: 50.9097, lon: -1.4044 },
+  { name: "Coventry", slug: "coventry", lat: 52.4068, lon: -1.5197 },
+  { name: "Hull", slug: "hull", lat: 53.7443, lon: -0.3325 },
+  { name: "Stoke-on-Trent", slug: "stoke-on-trent", lat: 53.0235, lon: -2.1804 },
+  { name: "Derby", slug: "derby", lat: 52.9225, lon: -1.4746 },
+  { name: "Wolverhampton", slug: "wolverhampton", lat: 52.5862, lon: -2.1288 },
+  { name: "Plymouth", slug: "plymouth", lat: 50.3755, lon: -4.1427 },
+  { name: "Reading", slug: "reading", lat: 51.4543, lon: -0.9781 },
+  { name: "Norwich", slug: "norwich", lat: 52.6309, lon: 1.2974 },
+  { name: "Swansea", slug: "swansea", lat: 51.6214, lon: -3.9436 },
+  { name: "Aberdeen", slug: "aberdeen", lat: 57.1497, lon: -2.0943 },
+  { name: "Dundee", slug: "dundee", lat: 56.4620, lon: -2.9707 },
+  { name: "Exeter", slug: "exeter", lat: 50.7184, lon: -3.5339 },
+  { name: "Bournemouth", slug: "bournemouth", lat: 50.7192, lon: -1.8808 },
+  { name: "Portsmouth", slug: "portsmouth", lat: 50.7989, lon: -1.0912 },
+  { name: "Preston", slug: "preston", lat: 53.7632, lon: -2.7031 },
+  { name: "Milton Keynes", slug: "milton-keynes", lat: 52.0406, lon: -0.7594 },
+  { name: "Bradford", slug: "bradford", lat: 53.7960, lon: -1.7594 },
 ];
 
 export function getCity(slug: string): City | undefined {

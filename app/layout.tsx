@@ -97,6 +97,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-GB" className={`${ibmMono.variable} antialiased`}>
+      <head>
+        {/* Without JS, Framer Motion's entry animations never run, leaving
+            elements stuck at their initial opacity:0. Force them visible so
+            content always renders for no-JS visitors and non-rendering crawlers. */}
+        <noscript>
+          <style>{`[style*="opacity:0"],[style*="opacity: 0"]{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
+      </head>
       <body className="font-mono">
         <script
           type="application/ld+json"

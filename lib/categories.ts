@@ -111,6 +111,16 @@ const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[] }>
   { patterns: /\bsupreme\b/i, brand: "Supreme", shopTypes: ["clothes", "boutique"] },
   { patterns: /\b(calvin klein|ck)\b/i, brand: "Calvin Klein", shopTypes: ["clothes"] },
   { patterns: /\b(hugo boss|boss)\b/i, brand: "Hugo Boss", shopTypes: ["clothes", "boutique"] },
+  { patterns: /\bbarbour\b/i, brand: "Barbour", shopTypes: ["clothes"] },
+  { patterns: /\bsuperdry\b/i, brand: "Superdry", shopTypes: ["clothes"] },
+  { patterns: /\b(fred perry)\b/i, brand: "Fred Perry", shopTypes: ["clothes"] },
+  { patterns: /\bchampion\b/i, brand: "Champion", shopTypes: ["clothes"] },
+  { patterns: /\bellesse\b/i, brand: "Ellesse", shopTypes: ["clothes", "sports"] },
+  { patterns: /\bfila\b/i, brand: "Fila", shopTypes: ["clothes", "sports", "shoes"] },
+  { patterns: /\bdiesel\b/i, brand: "Diesel", shopTypes: ["clothes"] },
+  { patterns: /\bcrocs\b/i, brand: "Crocs", shopTypes: ["shoes"] },
+  { patterns: /\bbirkenstock\b/i, brand: "Birkenstock", shopTypes: ["shoes"] },
+  { patterns: /\bskechers\b/i, brand: "Skechers", shopTypes: ["shoes", "sports"] },
 
   // Multi-brand retailers (the brand= value is the retailer itself)
   { patterns: /\b(jd sports|jd)\b/i, brand: "JD Sports", shopTypes: ["shoes", "sports", "clothes"] },
