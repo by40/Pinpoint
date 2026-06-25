@@ -40,7 +40,13 @@ const ITEM_MAP: Array<{ patterns: RegExp; tags: string[] }> = [
   { patterns: /\b(activewear|gym wear|sportswear|gymwear|yoga|workout|running|cycling kit|tracksuit|sports? bra)\b/i, tags: ["sports", "clothes", "shoes"] },
 
   // Underwear / sleep / swim
-  { patterns: /\b(underwear|boxers?|briefs?|lingerie|bra|socks?|sleepwear|pyjamas?|pajamas?|swimwear|swimsuit|bikini|trunks)\b/i, tags: ["clothes"] },
+  { patterns: /\b(underwear|boxers?|briefs?|lingerie|bra|socks?|sleepwear|pyjamas?|pajamas?|swimwear|swimsuit|bikini|trunks|loungewear|nightwear|onesie|dressing gown|robe)\b/i, tags: ["clothes"] },
+
+  // Other garments
+  { patterns: /\b(jersey|kit|base ?layer|crop top|bodysuit|camisole|bralette|tank top)\b/i, tags: ["clothes"] },
+  { patterns: /\b(dungarees|overalls|jumpsuit|playsuit|romper|culottes)\b/i, tags: ["clothes"] },
+  { patterns: /\b(costume|fancy dress|kimono|sari|saree|hijab|abaya|kilt|poncho|cape|cagoule|shacket|body ?warmer)\b/i, tags: ["clothes"] },
+  { patterns: /\b(maternity|plus size|petite|workwear|uniform)\b/i, tags: ["clothes"] },
 
   // Accessories
   { patterns: /\b(hat|cap|beanie|scarf|gloves?|belt|tie|accessor(?:y|ies)|sunglasses)\b/i, tags: ["clothes", "fashion_accessories", "accessories"] },
@@ -136,10 +142,20 @@ const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[]; r
   { patterns: /\b(tk ?maxx)\b/i, brand: "TK Maxx", shopTypes: ["clothes", "shoes"], retailer: true },
   { patterns: /\bflannels\b/i, brand: "Flannels", shopTypes: ["clothes", "boutique"], retailer: true },
   { patterns: /\b(selfridges|harvey nichols|harrods)\b/i, brand: "", shopTypes: ["department_store", "boutique", "clothes"], retailer: true },
+  { patterns: /\bdecathlon\b/i, brand: "Decathlon", shopTypes: ["sports", "shoes"], retailer: true },
+  { patterns: /\bfootasylum\b/i, brand: "Footasylum", shopTypes: ["shoes", "sports"], retailer: true },
+  { patterns: /\bdeichmann\b/i, brand: "Deichmann", shopTypes: ["shoes"], retailer: true },
+  { patterns: /\b(shoe ?zone)\b/i, brand: "Shoe Zone", shopTypes: ["shoes"], retailer: true },
+  { patterns: /\bmatalan\b/i, brand: "Matalan", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\bpeacocks\b/i, brand: "Peacocks", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\bburton\b/i, brand: "Burton", shopTypes: ["clothes"], retailer: true },
 ];
 
-// Default clothing shop types when a query matches nothing specific.
-const FALLBACK_TYPES = ["clothes", "shoes", "boutique", "fashion_accessories"];
+// Clearly non-clothing searches. Pinpoint only covers fashion, so when a query
+// matches none of the clothing items/brands above but does hit this list, we
+// reject it (no results + a "clothing only" message) rather than returning
+// random nearby clothing shops.
+const NON_CLOTHING = /\b(poster|posters|print|prints|painting|frame|phone|iphone|smartphone|samsung|laptop|computer|pc|macbook|tablet|ipad|tv|television|monitor|camera|headphones?|earbuds?|airpods?|console|playstation|xbox|nintendo|charger|cable|battery|electronics?|fridge|freezer|microwave|kettle|toaster|appliance|furniture|sofa|couch|desk|mattress|lamp|curtains?|food|pizza|burger|sandwich|coffee|milk|bread|cake|chocolate|sweets?|candy|wine|beer|alcohol|spirits?|grocer(?:y|ies)|fruit|vegetables?|meat|takeaway|restaurant|books?|novel|magazine|comic|pencil|notebook|stationery|guitar|piano|drums?|violin|trumpet|vinyl|records?|cd|dvd|tools?|drill|hammer|screwdriver|nails?|screws?|timber|hardware|diy|plants?|flowers?|garden|seeds?|soil|compost|\bpet\b|puppy|kitten|toy|toys|lego|puzzle|jigsaw|medicine|pharmacy|vitamins?|prescription|makeup|cosmetics?|lipstick|mascara|perfume|cologne|shampoo|cars?|tyres?|motorbike|scooter|football|basketball|cricket bat|dumbbell|kettlebell|treadmill|bicycle|bike)\b/i;
 
 export function resolveQuery(query: string): ResolvedQuery {
   const itemTypes = new Set<string>();
@@ -175,23 +191,27 @@ export function resolveQuery(query: string): ResolvedQuery {
     return { shopTypes: [], brands: Array.from(brands), matched: true, nameMatch };
   }
 
-  // Otherwise: the named item constrains the shop types ("Nike trainers" → shoe/
-  // sportswear shops, not every clothes shop). Fall back to the brand's broad
-  // categories only when no item was named (e.g. just "Nike"), and to general
-  // clothing shops + a name search when nothing was recognised (unknown brand).
-  let shopTypes: Set<string>;
-  let nameMatch: string | null = null;
-  if (itemMatched) shopTypes = itemTypes;
-  else if (brandMatched) shopTypes = brandTypes;
-  else {
-    shopTypes = new Set(FALLBACK_TYPES);
-    nameMatch = query.trim();
+  // Nothing recognised as clothing.
+  if (!itemMatched && !brandMatched) {
+    // A clearly non-clothing search ("poster", "laptop", "pizza") → reject.
+    if (NON_CLOTHING.test(query)) {
+      return { shopTypes: [], brands: [], matched: false, nameMatch: null, rejected: true };
+    }
+    // Unknown but plausibly clothing (e.g. an unknown brand like "Gucci") —
+    // match by shop name only, scoped to clothing shops in buildQuery, so
+    // random words don't return every nearby clothing shop.
+    return { shopTypes: [], brands: [], matched: false, nameMatch: query.trim() };
   }
+
+  // The named item constrains the shop types ("Nike trainers" → shoe/sportswear
+  // shops, not every clothes shop). Only use the brand's broad categories when
+  // no specific item was named (e.g. just "Nike").
+  const shopTypes = itemMatched ? itemTypes : brandTypes;
 
   return {
     shopTypes: Array.from(shopTypes),
     brands: Array.from(brands),
-    matched: itemMatched || brandMatched,
-    nameMatch,
+    matched: true,
+    nameMatch: null,
   };
 }

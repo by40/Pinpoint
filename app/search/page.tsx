@@ -33,6 +33,7 @@ function SearchApp() {
   const [matchedTags, setMatchedTags] = useState<string[]>([]);
   const [matchedBrands, setMatchedBrands] = useState<string[]>([]);
   const [brandOnly, setBrandOnly] = useState(false);
+  const [rejected, setRejected] = useState(false);
   const [shareLabel, setShareLabel] = useState("Share");
   const [widenedNote, setWidenedNote] = useState<string | null>(null);
   const [radiusMiles, setRadiusMiles] = useState(2);
@@ -50,7 +51,7 @@ function SearchApp() {
     );
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? "Failed to fetch shops");
-    return data as { shops: Shop[]; tags: string[]; brands: string[] };
+    return data as { shops: Shop[]; tags: string[]; brands: string[]; rejected?: boolean };
   };
 
   const handleSearch = useCallback(async (searchQuery: string, lat: number, lon: number) => {
@@ -58,6 +59,7 @@ function SearchApp() {
     setError(null);
     setActiveShopId(null);
     setWidenedNote(null);
+    setRejected(false);
     sounds.playStart();
     sounds.startLoadingLoop();
 
@@ -67,8 +69,9 @@ function SearchApp() {
       let data = await fetchShops(searchQuery, lat, lon, baseMiles);
 
       // Auto-broaden once if nothing turned up and we're not already at the cap —
-      // thin OpenStreetMap coverage shouldn't read as "no shops exist".
-      if ((data.shops?.length ?? 0) === 0 && baseMiles < 10) {
+      // thin OpenStreetMap coverage shouldn't read as "no shops exist". Skip for
+      // rejected (non-clothing) queries — widening won't help those.
+      if (!data.rejected && (data.shops?.length ?? 0) === 0 && baseMiles < 10) {
         const widerMiles = Math.min(baseMiles * 2, 10);
         const wider = await fetchShops(searchQuery, lat, lon, widerMiles);
         if ((wider.shops?.length ?? 0) > 0) {
@@ -80,6 +83,7 @@ function SearchApp() {
       setResult({ query: searchQuery, lat, lon, shops: data.shops });
       setMatchedTags(data.tags ?? []);
       setMatchedBrands(data.brands ?? []);
+      setRejected(data.rejected ?? false);
       setBrandOnly(false);
       // Reflect the query in the URL so the search is shareable/bookmarkable.
       router.replace(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false });
@@ -261,7 +265,28 @@ function SearchApp() {
               </div>
             )}
 
-            {hasSearched && !loading && !error && !hasResults && (
+            {hasSearched && !loading && !error && !hasResults && rejected && (
+              <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2" role="status" aria-live="polite">
+                <p className="text-sm font-medium text-[#141412] mb-1">Pinpoint is for clothes &amp; fashion</p>
+                <p className="text-xs text-[#6B6A63] leading-relaxed max-w-[260px] mb-4">
+                  &ldquo;{result.query}&rdquo; doesn&apos;t look like clothing. Try a brand or a garment instead —
+                  like one of these:
+                </p>
+                <div className="flex flex-wrap gap-1.5 justify-center">
+                  {EXAMPLE_SEARCHES.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setQuery(s)}
+                      className="text-xs bg-white hover:bg-[#EAE8E3] border border-[#E3E1DB] text-[#57554E] hover:text-[#141412] px-3 py-1.5 rounded-full transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {hasSearched && !loading && !error && !hasResults && !rejected && (
               <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2" role="status" aria-live="polite">
                 <p className="text-sm font-medium text-[#141412] mb-1">No shops found for &ldquo;{result.query}&rdquo;</p>
                 <p className="text-xs text-[#6B6A63] leading-relaxed max-w-[260px]">

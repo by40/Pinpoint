@@ -55,6 +55,13 @@ export async function GET(req: NextRequest) {
 
   try {
     const resolved = resolveQuery(q);
+    // Non-clothing search → tell the client so it can show a "clothing only" note.
+    if (resolved.rejected) {
+      return NextResponse.json(
+        { shops: [], tags: [], brands: [], rejected: true },
+        { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
+      );
+    }
     const shops = await queryNearbyShops(resolved, lat, lon, radius);
     return NextResponse.json(
       { shops, tags: resolved.shopTypes, brands: resolved.brands },

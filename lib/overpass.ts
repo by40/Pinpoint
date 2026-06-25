@@ -23,6 +23,9 @@ export interface ResolvedQuery {
   brands: string[];
   matched: boolean;
   nameMatch: string | null;
+  // True when the query is clearly NOT clothing (e.g. "poster", "laptop"); the
+  // API short-circuits these to no results with a "clothing only" message.
+  rejected?: boolean;
 }
 
 // Cap on results returned to the client. City-centre clothing searches can
@@ -117,13 +120,24 @@ function buildQuery(
     parts.push(`  way["brand"~"${bb}",i]${around};`);
   }
   if (nameTerm) {
+    // Constrain name matches to clothing-type shops, so an unknown query like
+    // "Sony" can't surface an electronics shop that happens to match by name.
     const nn = escapeQL(nameTerm);
-    parts.push(`  node["shop"]["name"~"${nn}",i]${around};`);
-    parts.push(`  way["shop"]["name"~"${nn}",i]${around};`);
+    const types = `^(${NAME_MATCH_SHOP_TYPES.join("|")})$`;
+    parts.push(`  node["shop"~"${types}"]["name"~"${nn}",i]${around};`);
+    parts.push(`  way["shop"~"${types}"]["name"~"${nn}",i]${around};`);
   }
 
   return `[out:json][timeout:25];\n(\n${parts.join("\n")}\n);\nout center tags;`;
 }
+
+// Shop types considered "clothing/fashion" — used to keep name-based matches
+// scoped to relevant shops.
+const NAME_MATCH_SHOP_TYPES = [
+  "clothes", "shoes", "boutique", "fashion", "fashion_accessories", "accessories",
+  "second_hand", "charity", "sports", "outdoor", "department_store", "bag",
+  "jewelry", "jewellery", "watches", "tailor", "baby_goods",
+];
 
 // Public Overpass mirrors, tried in order. The public endpoints are heavily
 // rate-limited and occasionally down, so we fail over between them.
@@ -189,6 +203,11 @@ export async function queryNearbyShops(
   lon: number,
   radius: number
 ): Promise<Shop[]> {
+  // Non-clothing queries are rejected upstream; never hit Overpass for them.
+  if (resolved.rejected || (resolved.shopTypes.length === 0 && resolved.brands.length === 0 && !resolved.nameMatch)) {
+    return [];
+  }
+
   const key = cacheKey(resolved, lat, lon, radius);
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.shops;
