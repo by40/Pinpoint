@@ -1,0 +1,13 @@
+import { renderOgImage, ogSize, ogContentType } from "@/lib/og";
+
+export const alt = "Pinpoint — Search any item, see who sells it nearby";
+export const size = ogSize;
+export const contentType = ogContentType;
+
+export default function OpengraphImage() {
+  return renderOgImage({
+    line1: "Search any item.",
+    line2: "See who sells it.",
+    subtitle: "Nearby shops, mapped in 3D and sorted by distance.",
+  });
+}
