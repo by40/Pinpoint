@@ -12,23 +12,25 @@ const ibmMono = IBM_Plex_Mono({
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pinpointapp.uk";
 const DESCRIPTION =
-  "Search for any item and instantly see nearby shops that sell it — mapped in 3D, powered by community OpenStreetMap data. Free, no account needed.";
+  "Search a clothing brand or item and instantly see nearby shops likely to sell it — mapped in 3D, powered by community OpenStreetMap data. Free, no account needed.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Pinpoint — Find local shops near you",
+    default: "Pinpoint — Find clothes & brands in local shops",
     template: "%s · Pinpoint",
   },
   description: DESCRIPTION,
   applicationName: "Pinpoint",
   keywords: [
-    "local shops",
-    "shop finder",
-    "find shops near me",
-    "nearby stores",
-    "where to buy",
-    "independent shops",
+    "clothes near me",
+    "where to buy clothes",
+    "find a brand near me",
+    "Nike near me",
+    "local clothing shops",
+    "fashion shops near me",
+    "shoe shops near me",
+    "vintage clothing shops",
     "OpenStreetMap",
   ],
   authors: [{ name: "Pinpoint" }],
@@ -39,13 +41,13 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Pinpoint",
     url: SITE_URL,
-    title: "Pinpoint — Find local shops near you",
+    title: "Pinpoint — Find clothes & brands in local shops",
     description: DESCRIPTION,
     locale: "en_GB",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pinpoint — Find local shops near you",
+    title: "Pinpoint — Find clothes & brands in local shops",
     description: DESCRIPTION,
   },
   robots: { index: true, follow: true },

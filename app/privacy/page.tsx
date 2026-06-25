@@ -127,8 +127,10 @@ export default function PrivacyPage() {
 
         <Section title="Accuracy of results">
           <p>
-            Shop listings come from community-maintained OpenStreetMap data and may be incomplete or out of date. Price
-            indicators are rough estimates based on shop type, not live prices. Always confirm with the shop directly.
+            Pinpoint shows nearby shops <strong className="text-[#141412] font-semibold">likely</strong> to sell a brand or
+            type of clothing, based on community-maintained OpenStreetMap shop and brand data — it does not check live
+            stock, so it can&apos;t confirm a shop actually has a specific item. Listings may be incomplete or out of date,
+            and price indicators are rough estimates based on shop type, not live prices. Always confirm with the shop directly.
           </p>
         </Section>
 

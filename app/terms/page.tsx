@@ -48,10 +48,12 @@ export default function TermsPage() {
 
         <Section title="What Pinpoint is">
           <p>
-            Pinpoint helps you find local shops that may sell an item, by matching your search to categories in
-            community-maintained <strong className="text-[#141412] font-semibold">OpenStreetMap</strong> data and showing
-            nearby results on a map. It is an informational tool — not a shop, a marketplace, or a booking service. We
-            don&apos;t sell anything and we aren&apos;t affiliated with the shops shown.
+            Pinpoint helps you find local shops <strong className="text-[#141412] font-semibold">likely</strong> to sell a
+            clothing brand or item, by matching your search to shop categories and brand tags in community-maintained{" "}
+            <strong className="text-[#141412] font-semibold">OpenStreetMap</strong> data and showing nearby results on a
+            map. It does not track live inventory, so it can&apos;t confirm a shop actually stocks a specific product. It
+            is an informational tool — not a shop, a marketplace, or a booking service. We don&apos;t sell anything and we
+            aren&apos;t affiliated with the shops or brands shown.
           </p>
         </Section>
 

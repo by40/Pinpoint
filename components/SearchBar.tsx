@@ -85,7 +85,7 @@ export default function SearchBar({ onSearch, loading, value: controlledValue, o
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             maxLength={80}
-            placeholder="Search for an item… e.g. vinyl records"
+            placeholder="Search a brand or item… e.g. Nike trainers"
             className="w-full bg-white border border-[#E3E1DB] text-[#141412] placeholder-[#6B6A63] rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#141412]/40 focus:ring-1 focus:ring-[#141412]/10 transition-colors"
           />
         </div>

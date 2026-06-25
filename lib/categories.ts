@@ -1,90 +1,153 @@
-// Maps user search terms to OSM shop=* tag values.
-// Each entry is a list of [keyword patterns, OSM shop types] pairs.
+// Resolves a clothing/fashion search into (a) OSM shop=* types and (b) brand
+// names to match against OSM brand=* tags. OpenStreetMap has no product
+// inventory, so results mean "nearby shops likely to sell this brand/type",
+// not confirmed stock.
 
-const CATEGORY_MAP: Array<{ patterns: RegExp; tags: string[] }> = [
-  // Food & Drink
-  { patterns: /\b(coffee|espresso|latte|cappuccino)\b/i, tags: ["coffee", "cafe"] },
-  { patterns: /\b(milk|cheese|butter|yogurt|dairy|eggs?|bread|groceries?|grocery|food|snacks?|cereal)\b/i, tags: ["supermarket", "convenience", "farm"] },
-  { patterns: /\b(fruit|vegetables?|veg|produce|organic)\b/i, tags: ["greengrocer", "supermarket", "farm"] },
-  { patterns: /\b(meat|beef|chicken|pork|lamb|steak|butcher)\b/i, tags: ["butcher", "supermarket"] },
-  { patterns: /\b(fish|seafood|sushi|salmon|prawns?)\b/i, tags: ["seafood", "fishmonger", "supermarket"] },
-  { patterns: /\b(bread|bakery|croissant|pastry|cake|muffin|doughnut|donut|baked)\b/i, tags: ["bakery"] },
-  { patterns: /\b(wine|beer|spirits?|alcohol|whiskey|whisky|gin|vodka|rum|cider|lager|ale)\b/i, tags: ["alcohol", "wine", "off_licence"] },
-  { patterns: /\b(chocolate|sweets?|candy|lollies|candy bar)\b/i, tags: ["confectionery", "chocolate", "supermarket"] },
-  { patterns: /\b(ice cream|gelato|frozen yogurt)\b/i, tags: ["ice_cream"] },
+import type { ResolvedQuery } from "./overpass";
 
-  // Health & Pharmacy
-  { patterns: /\b(medicine|pharmacy|prescription|vitamins?|supplements?|paracetamol|aspirin|ibuprofen|drugs?|medication)\b/i, tags: ["pharmacy", "chemist"] },
-  { patterns: /\b(optician|glasses|spectacles|contact lenses?|eyewear)\b/i, tags: ["optician"] },
-  { patterns: /\b(health food|protein powder|whey|nutrition)\b/i, tags: ["health_food", "supermarket"] },
+// ---- Clothing item categories -------------------------------------------------
+// Same shape as before: keyword patterns → OSM shop types.
+const ITEM_MAP: Array<{ patterns: RegExp; tags: string[] }> = [
+  // Footwear
+  { patterns: /\b(trainers?|sneakers?|kicks|runners?|plimsolls?)\b/i, tags: ["shoes", "sports"] },
+  { patterns: /\b(shoes?|boots?|heels?|sandals?|loafers?|brogues?|flats?|footwear|pumps?)\b/i, tags: ["shoes"] },
+  { patterns: /\b(football boots?|astro|cleats?|studs?)\b/i, tags: ["sports", "shoes"] },
 
-  // Music & Entertainment
-  { patterns: /\b(guitar|bass|drums?|piano|keyboard|violin|cello|trumpet|saxophone|ukulele|banjo|strings?|picks?|pedal|amp|amplifier)\b/i, tags: ["music"] },
-  { patterns: /\b(vinyl|records?|album|cd|dvd|blu.?ray)\b/i, tags: ["music", "second_hand"] },
-  { patterns: /\b(games?|gaming|console|playstation|xbox|nintendo|video game)\b/i, tags: ["video_games", "electronics"] },
+  // Tops
+  { patterns: /\b(t.?shirts?|tee|tees|top|tops|vest|tank)\b/i, tags: ["clothes"] },
+  { patterns: /\b(shirt|blouse|polo)\b/i, tags: ["clothes"] },
+  { patterns: /\b(hoodie|hoody|sweatshirt|jumper|sweater|knit|cardigan|fleece)\b/i, tags: ["clothes"] },
 
-  // Electronics & Tech
-  { patterns: /\b(phone|smartphone|mobile|iphone|android|samsung)\b/i, tags: ["mobile_phone", "electronics"] },
-  { patterns: /\b(laptop|computer|pc|mac|tablet|monitor|keyboard|mouse|headphones?|earphones?|earbuds?)\b/i, tags: ["computer", "electronics"] },
-  { patterns: /\b(camera|lens|tripod|photography)\b/i, tags: ["camera", "electronics"] },
-  { patterns: /\b(tv|television|smart tv|plasma)\b/i, tags: ["electronics"] },
-  { patterns: /\b(battery|batteries|charger|cable|usb|adaptor)\b/i, tags: ["electronics", "convenience"] },
+  // Bottoms
+  { patterns: /\b(jeans?|denim)\b/i, tags: ["clothes"] },
+  { patterns: /\b(trousers?|pants?|chinos?|joggers?|sweatpants|cargos?|slacks)\b/i, tags: ["clothes"] },
+  { patterns: /\b(shorts?|leggings?|tights)\b/i, tags: ["clothes"] },
+  { patterns: /\b(skirt|skort)\b/i, tags: ["clothes"] },
 
-  // Clothes & Fashion
-  { patterns: /\b(vintage|retro|second.?hand|thrift|pre.?owned|used clothes)\b/i, tags: ["second_hand", "charity", "clothes"] },
-  { patterns: /\b(jeans?|denim|trousers?|pants?|shorts?|leggings?)\b/i, tags: ["clothes"] },
-  { patterns: /\b(shirt|t.?shirt|hoodie|jacket|coat|jumper|sweater|dress|skirt|blouse)\b/i, tags: ["clothes"] },
-  { patterns: /\b(shoes?|trainers?|sneakers?|boots?|heels?|sandals?|footwear)\b/i, tags: ["shoes", "clothes"] },
-  { patterns: /\b(hat|cap|beanie|scarf|gloves?|accessories)\b/i, tags: ["clothes", "accessories"] },
-  { patterns: /\b(sports? wear|gym wear|activewear|yoga)\b/i, tags: ["sports", "clothes"] },
-  { patterns: /\b(suit|formal|office wear)\b/i, tags: ["clothes"] },
+  // Dresses & formal
+  { patterns: /\b(dress|dresses|gown|frock)\b/i, tags: ["clothes"] },
+  { patterns: /\b(suit|tuxedo|blazer|formal|office wear|waistcoat)\b/i, tags: ["clothes", "tailor"] },
+
+  // Outerwear
+  { patterns: /\b(jacket|coat|parka|puffer|gilet|bomber|windbreaker|raincoat|mac|anorak|overcoat)\b/i, tags: ["clothes"] },
+
+  // Activewear
+  { patterns: /\b(activewear|gym wear|sportswear|gymwear|yoga|workout|running|cycling kit|tracksuit|sports? bra)\b/i, tags: ["sports", "clothes", "shoes"] },
+
+  // Underwear / sleep / swim
+  { patterns: /\b(underwear|boxers?|briefs?|lingerie|bra|socks?|sleepwear|pyjamas?|pajamas?|swimwear|swimsuit|bikini|trunks)\b/i, tags: ["clothes"] },
+
+  // Accessories
+  { patterns: /\b(hat|cap|beanie|scarf|gloves?|belt|tie|accessor(?:y|ies)|sunglasses)\b/i, tags: ["clothes", "fashion_accessories", "accessories"] },
+  { patterns: /\b(bag|handbag|purse|tote|backpack|rucksack|holdall|wallet)\b/i, tags: ["bag", "clothes", "fashion_accessories"] },
   { patterns: /\b(jewellery|jewelry|ring|necklace|bracelet|earrings?|watch|watches)\b/i, tags: ["jewelry", "watches"] },
 
-  // Books & Stationery
-  { patterns: /\b(book|novel|fiction|non.?fiction|autobiography|biography|textbook)\b/i, tags: ["books"] },
-  { patterns: /\b(pen|pencil|notebook|stationery|paper|ink|printer)\b/i, tags: ["stationery"] },
-  { patterns: /\b(art supply|art supplies|paint|canvas|brush|easel|drawing)\b/i, tags: ["art", "stationery"] },
+  // Vintage / pre-owned / kids
+  { patterns: /\b(vintage|retro|second.?hand|thrift|pre.?owned|preloved|used|charity)\b/i, tags: ["second_hand", "charity", "clothes"] },
+  { patterns: /\b(kids?|childrens?|baby|toddler|boys?|girls?)\b/i, tags: ["clothes", "baby_goods"] },
 
-  // Sports & Outdoors
-  { patterns: /\b(football|soccer ball|rugby|cricket|tennis|badminton|squash|racket)\b/i, tags: ["sports"] },
-  { patterns: /\b(running|cycling|swim|swimming|gym|fitness|weights?|dumbbell|barbell)\b/i, tags: ["sports"] },
-  { patterns: /\b(bike|bicycle|cycling)\b/i, tags: ["bicycle", "sports"] },
-  { patterns: /\b(camping|hiking|tent|sleeping bag|backpack|outdoor)\b/i, tags: ["outdoor", "sports"] },
-  { patterns: /\b(surf|skateboard|snowboard|ski|skiing)\b/i, tags: ["sports"] },
-
-  // Home & DIY
-  { patterns: /\b(furniture|sofa|couch|table|chair|bed|wardrobe|shelf|shelves)\b/i, tags: ["furniture"] },
-  { patterns: /\b(tool|drill|hammer|screwdriver|saw|nails?|screws?|bolts?|diy)\b/i, tags: ["hardware", "doityourself"] },
-  { patterns: /\b(paint|wallpaper|decorating|renovation)\b/i, tags: ["paint", "hardware", "doityourself"] },
-  { patterns: /\b(plants?|flowers?|garden|seeds?|pots?|soil|gardening)\b/i, tags: ["florist", "garden_centre"] },
-  { patterns: /\b(mattress|bedding|duvet|pillow|sheets?|towels?)\b/i, tags: ["bedding", "furniture"] },
-
-  // Beauty & Personal Care
-  { patterns: /\b(haircut|barber|hairdresser|salon)\b/i, tags: ["hairdresser", "barber"] },
-  { patterns: /\b(makeup|cosmetics?|foundation|lipstick|mascara|perfume|cologne)\b/i, tags: ["cosmetics", "beauty"] },
-  { patterns: /\b(shampoo|conditioner|soap|body wash|deodorant|toothbrush|toothpaste)\b/i, tags: ["chemist", "supermarket"] },
-
-  // Pets
-  { patterns: /\b(pet food|dog food|cat food|fish food|bird seed|pet)\b/i, tags: ["pet"] },
-
-  // Toys & Kids
-  { patterns: /\b(toy|toys|lego|puzzle|doll|action figure|board game)\b/i, tags: ["toys", "games"] },
-  { patterns: /\b(baby|nappy|diaper|pram|pushchair|stroller)\b/i, tags: ["baby_goods", "supermarket"] },
-
-  // General / Variety
-  { patterns: /\b(gift|present|card|greeting)\b/i, tags: ["gift", "stationery"] },
-  { patterns: /\b(bag|handbag|purse|wallet|luggage|suitcase|backpack)\b/i, tags: ["bag", "accessories", "luggage"] },
-  { patterns: /\b(glasses|sunglasses)\b/i, tags: ["optician", "accessories"] },
+  // Generic
+  { patterns: /\b(clothes|clothing|outfit|garment|wardrobe|apparel|fashion|streetwear|menswear|womenswear)\b/i, tags: ["clothes", "boutique", "fashion_accessories"] },
 ];
 
-export function getShopTags(query: string): string[] {
-  const matched = new Set<string>();
+// ---- Brands -------------------------------------------------------------------
+// Each entry: keyword pattern → the OSM brand= value to match (case-insensitive,
+// substring) + the shop types that brand typically sits in, so multi-brand
+// retailers (which won't carry that brand= tag) are also surfaced.
+const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[] }> = [
+  // Sportswear & footwear brands
+  { patterns: /\bnike\b/i, brand: "Nike", shopTypes: ["shoes", "sports", "clothes"] },
+  { patterns: /\b(jordan|air jordan)\b/i, brand: "Jordan", shopTypes: ["shoes", "sports", "clothes"] },
+  { patterns: /\badidas\b/i, brand: "Adidas", shopTypes: ["shoes", "sports", "clothes"] },
+  { patterns: /\bpuma\b/i, brand: "Puma", shopTypes: ["shoes", "sports", "clothes"] },
+  { patterns: /\b(new balance|nb)\b/i, brand: "New Balance", shopTypes: ["shoes", "sports", "clothes"] },
+  { patterns: /\breebok\b/i, brand: "Reebok", shopTypes: ["shoes", "sports", "clothes"] },
+  { patterns: /\basics\b/i, brand: "ASICS", shopTypes: ["shoes", "sports"] },
+  { patterns: /\bconverse\b/i, brand: "Converse", shopTypes: ["shoes", "clothes"] },
+  { patterns: /\bvans\b/i, brand: "Vans", shopTypes: ["shoes", "clothes"] },
+  { patterns: /\b(under armour|under armor)\b/i, brand: "Under Armour", shopTypes: ["sports", "clothes", "shoes"] },
+  { patterns: /\bgymshark\b/i, brand: "Gymshark", shopTypes: ["sports", "clothes"] },
 
-  for (const { patterns, tags } of CATEGORY_MAP) {
+  // Outdoor
+  { patterns: /\b(north face|tnf)\b/i, brand: "The North Face", shopTypes: ["outdoor", "clothes", "shoes"] },
+  { patterns: /\bpatagonia\b/i, brand: "Patagonia", shopTypes: ["outdoor", "clothes"] },
+  { patterns: /\b(berghaus|rab|montane|jack wolfskin)\b/i, brand: "", shopTypes: ["outdoor", "clothes"] },
+  { patterns: /\bcolumbia\b/i, brand: "Columbia", shopTypes: ["outdoor", "clothes"] },
+
+  // Denim / casual
+  { patterns: /\b(levi'?s?|levis)\b/i, brand: "Levi's", shopTypes: ["clothes"] },
+  { patterns: /\bwrangler\b/i, brand: "Wrangler", shopTypes: ["clothes"] },
+  { patterns: /\bcarhartt\b/i, brand: "Carhartt", shopTypes: ["clothes"] },
+  { patterns: /\bdickies\b/i, brand: "Dickies", shopTypes: ["clothes"] },
+
+  // High-street fashion
+  { patterns: /\bzara\b/i, brand: "Zara", shopTypes: ["clothes"] },
+  { patterns: /\bh&?m\b/i, brand: "H&M", shopTypes: ["clothes"] },
+  { patterns: /\buniqlo\b/i, brand: "Uniqlo", shopTypes: ["clothes"] },
+  { patterns: /\bprimark\b/i, brand: "Primark", shopTypes: ["clothes"] },
+  { patterns: /\bnext\b/i, brand: "Next", shopTypes: ["clothes"] },
+  { patterns: /\b(marks ?(and|&) ?spencer|m&?s)\b/i, brand: "Marks & Spencer", shopTypes: ["clothes"] },
+  { patterns: /\b(topshop|topman)\b/i, brand: "Topshop", shopTypes: ["clothes"] },
+  { patterns: /\b(river island)\b/i, brand: "River Island", shopTypes: ["clothes"] },
+  { patterns: /\b(new look)\b/i, brand: "New Look", shopTypes: ["clothes"] },
+
+  // Footwear specialists / boots
+  { patterns: /\b(dr\.? ?martens|doc martens|docs)\b/i, brand: "Dr. Martens", shopTypes: ["shoes"] },
+  { patterns: /\bclarks\b/i, brand: "Clarks", shopTypes: ["shoes"] },
+  { patterns: /\btimberland\b/i, brand: "Timberland", shopTypes: ["shoes", "clothes"] },
+  { patterns: /\bugg\b/i, brand: "UGG", shopTypes: ["shoes"] },
+
+  // Streetwear / premium
+  { patterns: /\bstone island\b/i, brand: "Stone Island", shopTypes: ["clothes", "boutique"] },
+  { patterns: /\b(ralph lauren|polo ralph)\b/i, brand: "Ralph Lauren", shopTypes: ["clothes", "boutique"] },
+  { patterns: /\b(tommy hilfiger|tommy)\b/i, brand: "Tommy Hilfiger", shopTypes: ["clothes"] },
+  { patterns: /\blacoste\b/i, brand: "Lacoste", shopTypes: ["clothes"] },
+  { patterns: /\b(st(?:u|ü)ssy)\b/i, brand: "Stüssy", shopTypes: ["clothes", "boutique"] },
+  { patterns: /\bsupreme\b/i, brand: "Supreme", shopTypes: ["clothes", "boutique"] },
+  { patterns: /\b(calvin klein|ck)\b/i, brand: "Calvin Klein", shopTypes: ["clothes"] },
+  { patterns: /\b(hugo boss|boss)\b/i, brand: "Hugo Boss", shopTypes: ["clothes", "boutique"] },
+
+  // Multi-brand retailers (the brand= value is the retailer itself)
+  { patterns: /\b(jd sports|jd)\b/i, brand: "JD Sports", shopTypes: ["shoes", "sports", "clothes"] },
+  { patterns: /\b(sports ?direct)\b/i, brand: "Sports Direct", shopTypes: ["sports", "shoes", "clothes"] },
+  { patterns: /\b(foot ?locker)\b/i, brand: "Foot Locker", shopTypes: ["shoes", "sports"] },
+  { patterns: /\bsize\?/i, brand: "size?", shopTypes: ["shoes", "clothes"] },
+  { patterns: /\bschuh\b/i, brand: "Schuh", shopTypes: ["shoes"] },
+  { patterns: /\boffice\b/i, brand: "Office", shopTypes: ["shoes"] },
+  { patterns: /\b(tk ?maxx)\b/i, brand: "TK Maxx", shopTypes: ["clothes", "shoes"] },
+  { patterns: /\bflannels\b/i, brand: "Flannels", shopTypes: ["clothes", "boutique"] },
+  { patterns: /\b(selfridges|harvey nichols|harrods)\b/i, brand: "", shopTypes: ["department_store", "boutique", "clothes"] },
+];
+
+// Default clothing shop types when a query matches nothing specific.
+const FALLBACK_TYPES = ["clothes", "shoes", "boutique", "fashion_accessories"];
+
+export function resolveQuery(query: string): ResolvedQuery {
+  const shopTypes = new Set<string>();
+  const brands = new Set<string>();
+  let matched = false;
+
+  for (const { patterns, tags } of ITEM_MAP) {
     if (patterns.test(query)) {
-      tags.forEach((t) => matched.add(t));
+      matched = true;
+      tags.forEach((t) => shopTypes.add(t));
     }
   }
 
-  return Array.from(matched);
+  for (const { patterns, brand, shopTypes: types } of BRAND_MAP) {
+    if (patterns.test(query)) {
+      matched = true;
+      if (brand) brands.add(brand);
+      types.forEach((t) => shopTypes.add(t));
+    }
+  }
+
+  // If nothing matched, fall back to general clothing shops so any term still
+  // returns nearby clothing options; queryNearbyShops also name-searches the
+  // raw term in this case (to catch unknown brands by shop name).
+  if (!matched) {
+    FALLBACK_TYPES.forEach((t) => shopTypes.add(t));
+  }
+
+  return { shopTypes: Array.from(shopTypes), brands: Array.from(brands), matched };
 }

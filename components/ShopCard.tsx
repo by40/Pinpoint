@@ -41,9 +41,16 @@ export default function ShopCard({ shop, index, active, onClick }: Props) {
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-[#141412] font-semibold text-sm leading-tight">{shop.name}</h3>
-        <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-[#F2F1ED] text-[#57554E] border border-[#E3E1DB]">
-          {typeLabel(shop.shopType)}
-        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          {shop.brand && (
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#141412] text-white">
+              {shop.brand}
+            </span>
+          )}
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F2F1ED] text-[#57554E] border border-[#E3E1DB]">
+            {typeLabel(shop.shopType)}
+          </span>
+        </div>
       </div>
 
       <p className="mt-1 text-[#6B6A63] text-xs leading-snug">{shop.address}</p>

@@ -20,7 +20,7 @@ interface SearchState {
   shops: Shop[];
 }
 
-const EXAMPLE_SEARCHES = ["vinyl records", "guitar strings", "vintage jeans", "organic bread", "camping gear"];
+const EXAMPLE_SEARCHES = ["Nike trainers", "vintage Levi's", "North Face jacket", "Adidas Sambas", "Dr. Martens"];
 
 function SearchApp() {
   const searchParams = useSearchParams();
@@ -30,6 +30,7 @@ function SearchApp() {
   const [result, setResult] = useState<SearchState | null>(null);
   const [activeShopId, setActiveShopId] = useState<string | null>(null);
   const [matchedTags, setMatchedTags] = useState<string[]>([]);
+  const [matchedBrands, setMatchedBrands] = useState<string[]>([]);
   const [widenedNote, setWidenedNote] = useState<string | null>(null);
   const [radiusMiles, setRadiusMiles] = useState(2);
   // Ref mirror so the stable handleSearch always reads the latest slider value.
@@ -46,7 +47,7 @@ function SearchApp() {
     );
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? "Failed to fetch shops");
-    return data as { shops: Shop[]; tags: string[] };
+    return data as { shops: Shop[]; tags: string[]; brands: string[] };
   };
 
   const handleSearch = useCallback(async (searchQuery: string, lat: number, lon: number) => {
@@ -75,6 +76,7 @@ function SearchApp() {
 
       setResult({ query: searchQuery, lat, lon, shops: data.shops });
       setMatchedTags(data.tags ?? []);
+      setMatchedBrands(data.brands ?? []);
       if ((data.shops?.length ?? 0) > 0) sounds.playSuccess();
       else sounds.playEmpty();
     } catch (err) {
@@ -109,7 +111,7 @@ function SearchApp() {
           <span className="font-semibold text-[#141412]">Pinpoint</span>
         </Link>
         <span className="text-[#6B6A63] text-sm hidden sm:block">·</span>
-        <span className="text-[#57554E] text-sm hidden sm:block">Find local shops near you</span>
+        <span className="text-[#57554E] text-sm hidden sm:block">Find clothes & brands near you</span>
         <div className="ml-auto flex items-center gap-4">
           <SoundToggle />
           <Link href="/wishlist" className="flex items-center gap-1.5 text-sm text-[#57554E] hover:text-[#141412] transition-colors">
@@ -182,9 +184,9 @@ function SearchApp() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-sm font-semibold text-[#141412] mb-1">Discover shops near you</h2>
+                    <h2 className="text-sm font-semibold text-[#141412] mb-1">Find clothes near you</h2>
                     <p className="text-xs text-[#6B6A63] max-w-[200px] leading-relaxed">
-                      Type any item above to find local shops that sell it.
+                      Search a brand or item above to find local shops likely to sell it.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-1.5 justify-center pt-1">
@@ -227,9 +229,9 @@ function SearchApp() {
               <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2" role="status" aria-live="polite">
                 <p className="text-sm font-medium text-[#141412] mb-1">No shops found for &ldquo;{result.query}&rdquo;</p>
                 <p className="text-xs text-[#6B6A63] leading-relaxed max-w-[260px]">
-                  We looked within {radiusMiles} {radiusMiles === 1 ? "mile" : "miles"}. Listings come from
-                  community OpenStreetMap data, which can be thin in some areas — try a broader term, a larger
-                  radius, or a nearby town.
+                  We looked within {radiusMiles} {radiusMiles === 1 ? "mile" : "miles"}. Clothing listings come from
+                  community OpenStreetMap data, which can be thin in some areas — try a brand name, a broader item,
+                  a larger radius, or a nearby town.
                 </p>
               </div>
             )}
@@ -245,10 +247,12 @@ function SearchApp() {
                   className="space-y-2"
                 >
                   <p className="text-xs text-[#6B6A63] pb-1" role="status" aria-live="polite" aria-atomic="true">
-                    <span className="text-[#141412] font-semibold">{result.shops.length}</span> shops nearby
-                    {matchedTags.length > 0 && (
+                    <span className="text-[#141412] font-semibold">{result.shops.length}</span> shops that may stock this
+                    {matchedBrands.length > 0 ? (
+                      <span> · <span className="text-[#141412]">{matchedBrands.slice(0, 3).join(", ")}</span> stockists</span>
+                    ) : matchedTags.length > 0 ? (
                       <span> · {matchedTags.slice(0, 3).join(", ")}</span>
-                    )}
+                    ) : null}
                   </p>
                   {widenedNote && (
                     <p className="text-[11px] text-[#6B6A63] bg-white border border-[#E3E1DB] rounded-lg px-3 py-2">

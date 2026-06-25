@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getShopTags } from "@/lib/categories";
+import { resolveQuery } from "@/lib/categories";
 import { queryNearbyShops } from "@/lib/overpass";
 
 const MAX_QUERY_LEN = 80;
@@ -54,10 +54,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const tags = getShopTags(q);
-    const shops = await queryNearbyShops(tags, q, lat, lon, radius);
+    const resolved = resolveQuery(q);
+    const shops = await queryNearbyShops(resolved, q, lat, lon, radius);
     return NextResponse.json(
-      { shops, tags },
+      { shops, tags: resolved.shopTypes, brands: resolved.brands },
       { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
     );
   } catch (err) {

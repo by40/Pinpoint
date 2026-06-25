@@ -30,8 +30,8 @@ const STORAGE_KEY = "pinpoint-wishlist";
 // public mirrors (and the user from a very slow batch).
 const MAX_ITEMS = 15;
 const SUGGESTIONS = [
-  "vinyl records", "guitar strings", "vintage jeans", "organic bread",
-  "camping gear", "art supplies", "coffee beans", "running shoes",
+  "Nike trainers", "vintage Levi's", "denim jacket", "band tee",
+  "Dr. Martens", "North Face jacket", "Adidas Sambas", "hoodie",
 ];
 
 export default function WishlistPage() {
@@ -223,7 +223,7 @@ export default function WishlistPage() {
           <span className="font-semibold text-[#141412]">Pinpoint</span>
         </Link>
         <span className="text-[#6B6A63] text-sm hidden sm:block">·</span>
-        <span className="text-[#57554E] text-sm hidden sm:block font-medium">My Wishlist</span>
+        <span className="text-[#57554E] text-sm hidden sm:block font-medium">My Outfit List</span>
         <div className="ml-auto flex items-center gap-4">
           <SoundToggle />
           <Link href="/search" className="text-sm text-[#57554E] hover:text-[#141412] transition-colors">
@@ -245,7 +245,7 @@ export default function WishlistPage() {
                 onChange={(e) => setInput(e.target.value)}
                 maxLength={80}
                 disabled={atItemLimit}
-                placeholder={atItemLimit ? `Limit of ${MAX_ITEMS} items reached` : "Add an item… e.g. vinyl records"}
+                placeholder={atItemLimit ? `Limit of ${MAX_ITEMS} items reached` : "Add an item… e.g. Nike trainers"}
                 className="flex-1 bg-white border border-[#E3E1DB] text-[#141412] placeholder-[#6B6A63] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#141412]/40 focus:ring-1 focus:ring-[#141412]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
               <motion.button
@@ -316,9 +316,9 @@ export default function WishlistPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-[#141412] mb-1">Your wishlist is empty</h3>
+                    <h3 className="text-sm font-semibold text-[#141412] mb-1">Your list is empty</h3>
                     <p className="text-xs text-[#6B6A63] leading-relaxed max-w-[200px]">
-                      Add items above, then find shops for everything at once.
+                      Add clothes above, then find shops for the whole outfit at once.
                     </p>
                   </div>
                   <div className="pt-1">

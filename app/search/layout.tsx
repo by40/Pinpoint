@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Search",
-  description: "Type any item and instantly see nearby shops that sell it on an interactive 3D map, sorted by distance.",
+  description: "Search a clothing brand or item and instantly see nearby shops likely to sell it on an interactive 3D map, sorted by distance.",
   alternates: { canonical: "/search" },
   openGraph: {
     title: "Search · Pinpoint",
-    description: "Type any item and instantly see nearby shops that sell it on an interactive 3D map.",
+    description: "Search a clothing brand or item and instantly see nearby shops likely to sell it on an interactive 3D map.",
     url: "/search",
   },
 };

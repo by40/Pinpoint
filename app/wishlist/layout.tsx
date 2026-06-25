@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Wishlist",
-  description: "Add everything you need, then find local shops for every item at once — each mapped and sorted by distance.",
+  title: "Outfit List",
+  description: "Add every piece of an outfit, then find local shops for all of it at once — each mapped and sorted by distance.",
   alternates: { canonical: "/wishlist" },
   openGraph: {
-    title: "Wishlist · Pinpoint",
-    description: "Add everything you need, then find local shops for every item at once.",
+    title: "Outfit List · Pinpoint",
+    description: "Add every piece of an outfit, then find local shops for all of it at once.",
     url: "/wishlist",
   },
 };

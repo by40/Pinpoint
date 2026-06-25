@@ -13,37 +13,37 @@ const APP_JSON_LD = {
   applicationCategory: "ShoppingApplication",
   operatingSystem: "Web",
   description:
-    "Search any item and instantly see nearby shops that sell it, mapped in 3D. Powered by OpenStreetMap.",
+    "Search a clothing item or brand and instantly see nearby shops likely to sell it, mapped in 3D. Powered by OpenStreetMap.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
   browserRequirements: "Requires JavaScript and location access.",
 };
 
-const CHIPS = ["vinyl records", "guitar strings", "vintage jeans", "organic bread", "camping gear"];
+const CHIPS = ["Nike trainers", "vintage Levi's", "North Face jacket", "Adidas Sambas", "Dr. Martens"];
 
 const FEATURES = [
   {
-    label: "Smart Search",
-    title: "Type anything. We figure out the rest.",
-    desc: "Enter any item — \"guitar strings\", \"vintage denim\", \"coffee beans\" — and we map it to the right OpenStreetMap shop categories automatically.",
+    label: "Brand search",
+    title: "Looking for a brand? We know where it lives.",
+    desc: "Type a brand — \"Nike\", \"Levi's\", \"The North Face\" — and we surface the brand's own stores plus the nearby shops and retailers that carry it.",
     link: null,
   },
   {
-    label: "Live Map",
+    label: "Item search",
+    title: "Or just say what you're after.",
+    desc: "\"Trainers\", \"vintage denim\", \"a winter coat\" — we map it to the right clothing, footwear and boutique shops near you automatically.",
+    link: null,
+  },
+  {
+    label: "Live map",
     title: "Every nearby shop, on the map.",
     desc: "Results pin straight onto an interactive map, sorted by walking distance. Tap any pin to see the address, opening hours, and website.",
     link: null,
   },
   {
-    label: "Wishlist",
-    title: "Shopping for multiple things? One search covers all.",
-    desc: "Add your whole list, then let Pinpoint search for every item at once — each result grouped and sorted by how close the shop is.",
-    link: { href: "/wishlist", text: "Try Wishlist →" },
-  },
-  {
-    label: "Price ranges",
-    title: "Know what to expect before you walk in.",
-    desc: "Every result includes an estimated price range based on shop type — budget to premium — so you can plan ahead.",
-    link: null,
+    label: "Outfit list",
+    title: "Building a whole outfit? Find it all in one go.",
+    desc: "Add every piece you want, then let Pinpoint search for all of them at once — each grouped and sorted by how close the shop is.",
+    link: { href: "/wishlist", text: "Try your list →" },
   },
 ];
 
@@ -63,7 +63,7 @@ function AppMockup() {
           <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#6B6A63" strokeWidth="2.5">
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4-4" strokeLinecap="round" />
           </svg>
-          <span className="text-[9px] text-[#6B6A63]">vinyl records</span>
+          <span className="text-[9px] text-[#6B6A63]">Nike trainers</span>
         </div>
       </div>
 
@@ -71,16 +71,16 @@ function AppMockup() {
         {/* Left panel — shop list */}
         <div className="w-36 shrink-0 border-r border-[#E3E1DB] p-2 space-y-1.5 bg-[#F7F6F3] overflow-hidden">
           {[
-            { name: "Resident Records", dist: "0.3 km", active: true },
-            { name: "The Record Shop", dist: "0.8 km", active: false },
-            { name: "Vinyl Heaven", dist: "1.4 km", active: false },
+            { name: "JD Sports", dist: "0.2 km", active: true },
+            { name: "Foot Locker", dist: "0.6 km", active: false },
+            { name: "size?", dist: "1.1 km", active: false },
           ].map((c, i) => (
             <div key={i} className={`p-2 rounded-lg border ${c.active ? "border-[#141412] bg-white" : "border-[#E3E1DB] bg-white"}`}>
               <div className="text-[9px] font-semibold text-[#141412] truncate leading-tight mb-0.5">{c.name}</div>
               <div className="text-[8px] text-[#6B6A63] mb-1.5">{c.dist} away</div>
               <div className="flex items-center gap-1">
-                <span className="text-[7px] bg-[#F7F6F3] border border-[#E3E1DB] px-1.5 py-0.5 rounded text-[#57554E]">Music</span>
-                <span className="text-[7px] text-[#6B6A63]">est. £</span>
+                <span className="text-[7px] bg-[#F7F6F3] border border-[#E3E1DB] px-1.5 py-0.5 rounded text-[#57554E]">Shoes</span>
+                <span className="text-[7px] text-[#6B6A63]">est. ££</span>
               </div>
             </div>
           ))}
@@ -160,11 +160,11 @@ export default function LandingPage() {
         >
           <div>
             <h1 className="text-[clamp(2.6rem,5.5vw,4.6rem)] font-bold leading-[1.08] tracking-tight text-[#141412] mb-5">
-              Find what you need,<br />right nearby.
+              Find the clothes<br />you want, nearby.
             </h1>
             <p className="text-[1.0625rem] text-[#57554E] leading-relaxed mb-7 max-w-md">
-              Type any item and see which local shops sell it — powered by crowd-sourced OpenStreetMap data.
-              Free, fast, and no account needed.
+              Search a brand or a clothing item and see the local shops likely to sell it — powered by
+              crowd-sourced OpenStreetMap data. Free, fast, and no account needed.
             </p>
             <div className="flex flex-wrap items-center gap-3 mb-5">
               <Link
@@ -174,7 +174,7 @@ export default function LandingPage() {
                 Start searching
               </Link>
               <Link href="/wishlist" className="text-sm text-[#57554E] hover:text-[#141412] transition-colors">
-                Try Wishlist mode →
+                Build an outfit list →
               </Link>
             </div>
             <div className="flex flex-wrap gap-1.5">
@@ -244,28 +244,28 @@ export default function LandingPage() {
           className="bg-white rounded-2xl border border-[#E3E1DB] p-8 sm:p-10 flex flex-col sm:flex-row gap-8 items-start"
         >
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-[#6B6A63] uppercase tracking-widest font-medium mb-3">Wishlist mode</p>
+            <p className="text-[10px] text-[#6B6A63] uppercase tracking-widest font-medium mb-3">Outfit list</p>
             <h2 className="text-2xl sm:text-[1.75rem] font-bold tracking-tight text-[#141412] mb-3 leading-tight">
-              Shopping for several things?<br className="hidden sm:block" /> Find them all in one go.
+              Putting an outfit together?<br className="hidden sm:block" /> Find every piece in one go.
             </h2>
             <p className="text-sm text-[#57554E] leading-relaxed mb-6 max-w-sm">
-              Add vinyl records, guitar strings, camping gear — whatever you need. Pinpoint searches for every item simultaneously and maps the nearest shops for each.
+              Add trainers, a denim jacket, a band tee — whatever you&apos;re after. Pinpoint searches for every item simultaneously and maps the nearest shops for each.
             </p>
             <Link
               href="/wishlist"
               className="inline-flex items-center gap-2 bg-[#141412] hover:bg-[#2A2A28] text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
             >
-              Try Wishlist →
+              Build your list →
             </Link>
           </div>
 
-          {/* Mini wishlist preview */}
+          {/* Mini outfit-list preview */}
           <div className="w-full sm:w-52 shrink-0 bg-[#F7F6F3] rounded-xl border border-[#E3E1DB] p-4">
-            <p className="text-[9px] text-[#6B6A63] uppercase tracking-widest font-medium mb-3">My wishlist</p>
+            <p className="text-[9px] text-[#6B6A63] uppercase tracking-widest font-medium mb-3">My list</p>
             {[
-              { name: "vinyl records", count: 12 },
-              { name: "guitar strings", count: 5 },
-              { name: "camping gear", count: 8 },
+              { name: "Nike trainers", count: 12 },
+              { name: "denim jacket", count: 5 },
+              { name: "band tee", count: 8 },
             ].map((item) => (
               <div key={item.name} className="flex items-center justify-between py-2 border-b border-[#E3E1DB] last:border-0">
                 <span className="text-xs text-[#141412]">{item.name}</span>
@@ -310,7 +310,8 @@ export default function LandingPage() {
             <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#141412] transition-colors">
               OpenFreeMap
             </a>
-            . Shop listings and price estimates may be incomplete or out of date — always confirm with the shop.
+            . Results are nearby shops likely to stock a brand or item based on community data — not confirmed
+            stock. Listings and price estimates may be incomplete or out of date; always confirm with the shop.
           </p>
         </div>
       </footer>

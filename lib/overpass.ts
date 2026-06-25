@@ -4,6 +4,7 @@ export interface Shop {
   lat: number;
   lon: number;
   shopType: string;
+  brand?: string;
   address: string;
   website?: string;
   phone?: string;
@@ -11,6 +12,18 @@ export interface Shop {
   distanceKm: number;
   priceRange: 1 | 2 | 3;
 }
+
+// A resolved clothing search: OSM shop types + brand names, plus whether the
+// query was actually recognised (used to decide on a name-search fallback).
+export interface ResolvedQuery {
+  shopTypes: string[];
+  brands: string[];
+  matched: boolean;
+}
+
+// Cap on results returned to the client. City-centre clothing searches can
+// return hundreds of shops; the nearest ~60 is plenty and keeps the list/map fast.
+const MAX_RESULTS = 60;
 
 // Distances are stored in km but the UI is UK-facing, so display in miles
 // (or yards for very short hops) to stay consistent with the miles radius slider.
@@ -22,8 +35,8 @@ export function formatDistance(distanceKm: number): string {
 
 function estimatePriceRange(shopType: string): 1 | 2 | 3 {
   const s = shopType.toLowerCase();
-  const budget = ["charity", "second_hand", "discount", "variety_store", "pawnbroker", "thrift"];
-  const premium = ["jewellery", "jewelry", "antiques", "art", "boutique", "cosmetics", "perfumery", "leather", "tailor", "watches", "optician"];
+  const budget = ["charity", "second_hand", "discount", "variety_store", "thrift"];
+  const premium = ["boutique", "jewellery", "jewelry", "designer", "tailor", "leather", "watches", "department_store"];
   if (budget.some((t) => s.includes(t))) return 1;
   if (premium.some((t) => s.includes(t))) return 3;
   return 2;
@@ -64,28 +77,48 @@ function buildAddress(tags: Record<string, string>): string {
   return parts.join(", ") || "Address not listed";
 }
 
-function buildQuery(tags: string[], lat: number, lon: number, radius: number): string {
-  const tagFilters = tags
-    .map(
-      (t) =>
-        `  node["shop"="${t}"](around:${radius},${lat},${lon});\n  way["shop"="${t}"](around:${radius},${lat},${lon});`
-    )
-    .join("\n");
-
-  return `[out:json][timeout:25];\n(\n${tagFilters}\n);\nout center tags;`;
-}
-
-function buildFallbackQuery(query: string, lat: number, lon: number, radius: number): string {
-  // Search for any shop whose name contains the query term.
-  // Two escaping layers: first regex-escape metacharacters so terms like "c++"
-  // or "(vintage" can't produce an invalid Overpass regex, then escape for the
-  // QL string literal (double every backslash so the regex engine receives the
-  // escapes intact, then escape quotes).
-  const escaped = query
+// Make a string safe to embed in an Overpass QL regex string literal.
+// Two escaping layers: first regex-escape metacharacters so values like "Dr.
+// Martens", "size?" or "(vintage" can't produce an invalid/over-broad regex,
+// then escape for the QL string literal (double every backslash so the regex
+// engine receives the escapes intact, then escape quotes).
+function escapeQL(value: string): string {
+  return value
     .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
     .replace(/\\/g, "\\\\")
     .replace(/"/g, '\\"');
-  return `[out:json][timeout:25];\n(\n  node["shop"]["name"~"${escaped}",i](around:${radius},${lat},${lon});\n  way["shop"]["name"~"${escaped}",i](around:${radius},${lat},${lon});\n);\nout center tags;`;
+}
+
+// Build the Overpass query for a clothing search: shop-type filters, brand=*
+// filters, and — for unrecognised queries (likely an unknown brand) — a
+// shop-name match so e.g. a "Gucci" store is still found by name.
+function buildQuery(
+  shopTypes: string[],
+  brands: string[],
+  nameTerm: string | null,
+  lat: number,
+  lon: number,
+  radius: number
+): string {
+  const around = `(around:${radius},${lat},${lon})`;
+  const parts: string[] = [];
+
+  for (const t of shopTypes) {
+    parts.push(`  node["shop"="${t}"]${around};`);
+    parts.push(`  way["shop"="${t}"]${around};`);
+  }
+  for (const b of brands) {
+    const bb = escapeQL(b);
+    parts.push(`  node["brand"~"${bb}",i]${around};`);
+    parts.push(`  way["brand"~"${bb}",i]${around};`);
+  }
+  if (nameTerm) {
+    const nn = escapeQL(nameTerm);
+    parts.push(`  node["shop"]["name"~"${nn}",i]${around};`);
+    parts.push(`  way["shop"]["name"~"${nn}",i]${around};`);
+  }
+
+  return `[out:json][timeout:25];\n(\n${parts.join("\n")}\n);\nout center tags;`;
 }
 
 // Public Overpass mirrors, tried in order. The public endpoints are heavily
@@ -105,10 +138,12 @@ const USER_AGENT = "Pinpoint/1.0 (+https://pinpointapp.uk; local shop finder)";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const cache = new Map<string, { at: number; shops: Shop[] }>();
 
-function cacheKey(tags: string[], query: string, lat: number, lon: number, radius: number): string {
+function cacheKey(resolved: ResolvedQuery, query: string, lat: number, lon: number, radius: number): string {
   // Round coords to ~110m so near-identical fixes share a cache entry.
-  const k = tags.length > 0 ? `t:${[...tags].sort().join(",")}` : `q:${query.toLowerCase()}`;
-  return `${k}|${lat.toFixed(3)}|${lon.toFixed(3)}|${radius}`;
+  const types = [...resolved.shopTypes].sort().join(",");
+  const brands = [...resolved.brands].sort().join(",");
+  const name = resolved.matched ? "" : query.toLowerCase();
+  return `t:${types}|b:${brands}|n:${name}|${lat.toFixed(3)}|${lon.toFixed(3)}|${radius}`;
 }
 
 // POST a query to the Overpass mirrors with one retry and endpoint failover.
@@ -145,17 +180,20 @@ async function runOverpass(ql: string): Promise<OverpassResponse> {
 }
 
 export async function queryNearbyShops(
-  tags: string[],
+  resolved: ResolvedQuery,
   query: string,
   lat: number,
   lon: number,
   radius: number
 ): Promise<Shop[]> {
-  const key = cacheKey(tags, query, lat, lon, radius);
+  const key = cacheKey(resolved, query, lat, lon, radius);
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.shops;
 
-  const ql = tags.length > 0 ? buildQuery(tags, lat, lon, radius) : buildFallbackQuery(query, lat, lon, radius);
+  // Name-search only when we didn't recognise the query (likely an unknown
+  // brand); recognised item/brand searches rely on shop-type + brand= filters.
+  const nameTerm = resolved.matched ? null : query;
+  const ql = buildQuery(resolved.shopTypes, resolved.brands, nameTerm, lat, lon, radius);
 
   const data = await runOverpass(ql);
   const seen = new Set<string>();
@@ -171,9 +209,9 @@ export async function queryNearbyShops(
     if (elLat == null || elLon == null) continue;
 
     // Deduplicate by name + approximate position
-    const key = `${name}|${elLat.toFixed(4)}|${elLon.toFixed(4)}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const dedupKey = `${name}|${elLat.toFixed(4)}|${elLon.toFixed(4)}`;
+    if (seen.has(dedupKey)) continue;
+    seen.add(dedupKey);
 
     shops.push({
       id: `${el.type}-${el.id}`,
@@ -181,6 +219,7 @@ export async function queryNearbyShops(
       lat: elLat,
       lon: elLon,
       shopType: tags.shop ?? "shop",
+      brand: tags.brand,
       address: buildAddress(tags),
       website: tags.website || tags["contact:website"],
       phone: tags.phone || tags["contact:phone"],
@@ -191,10 +230,11 @@ export async function queryNearbyShops(
   }
 
   shops.sort((a, b) => a.distanceKm - b.distanceKm);
+  const capped = shops.slice(0, MAX_RESULTS);
 
   // Bound cache growth: drop the oldest entry once it gets large.
   if (cache.size > 500) cache.delete(cache.keys().next().value!);
-  cache.set(key, { at: Date.now(), shops });
+  cache.set(key, { at: Date.now(), shops: capped });
 
-  return shops;
+  return capped;
 }
