@@ -18,6 +18,17 @@ body {
   }
 }
 
+/* Lightweight CSS entrance animation (replaces Framer Motion on the static
+   landing page so it ships zero animation JS). Pure CSS = works without JS and
+   the reduced-motion rule below neutralises it. */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-up {
+  animation: fadeUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -63,10 +63,20 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
       ...(shown.length
         ? [{
             "@type": "ItemList",
+            name: `Clothing shops in ${c.name}`,
+            numberOfItems: shown.length,
             itemListElement: shown.map((s, i) => ({
               "@type": "ListItem",
               position: i + 1,
-              name: s.name,
+              item: {
+                "@type": "ClothingStore",
+                name: s.name,
+                ...(s.address && s.address !== "Address not listed"
+                  ? { address: s.address }
+                  : {}),
+                geo: { "@type": "GeoCoordinates", latitude: s.lat, longitude: s.lon },
+                ...(s.website ? { url: s.website.startsWith("http") ? s.website : `https://${s.website}` } : {}),
+              },
             })),
           }]
         : []),

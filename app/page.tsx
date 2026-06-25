@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { motion, MotionConfig } from "framer-motion";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pinpointapp.uk";
 
@@ -122,7 +119,6 @@ function AppMockup() {
 
 export default function LandingPage() {
   return (
-    <MotionConfig reducedMotion="user">
     <div className="bg-[#F7F6F3] text-[#141412] min-h-screen">
       <script
         type="application/ld+json"
@@ -152,12 +148,7 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="px-6 pt-16 pb-12 max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-          className="grid md:grid-cols-[1fr_380px] gap-10 xl:gap-16 items-center"
-        >
+        <div className="grid md:grid-cols-[1fr_380px] gap-10 xl:gap-16 items-center fade-up">
           <div>
             <h1 className="text-[clamp(2.6rem,5.5vw,4.6rem)] font-bold leading-[1.08] tracking-tight text-[#141412] mb-5">
               Find the clothes<br />you want, nearby.
@@ -193,56 +184,39 @@ export default function LandingPage() {
           <div className="hidden md:block">
             <AppMockup />
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Features */}
       <section className="px-6 py-16 max-w-6xl mx-auto border-t border-[#E3E1DB]">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
-        >
-          <p className="text-[10px] text-[#6B6A63] uppercase tracking-widest font-medium mb-8">What you get</p>
-          <div>
-            {FEATURES.map((f, i) => (
-              <motion.div
-                key={f.label}
-                initial={{ opacity: 0, y: 8 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.35, delay: i * 0.06 }}
-                className="py-7 border-b border-[#E3E1DB] grid sm:grid-cols-[180px_1fr] gap-3 sm:gap-10"
-              >
-                <span className="text-[10px] text-[#6B6A63] uppercase tracking-wide font-medium pt-[3px]">{f.label}</span>
-                <div>
-                  <h3 className="font-semibold text-[#141412] mb-1.5 text-[0.9375rem]">{f.title}</h3>
-                  <p className="text-sm text-[#57554E] leading-relaxed">{f.desc}</p>
-                  {f.link && (
-                    <Link
-                      href={f.link.href}
-                      className="inline-block mt-3 text-sm font-medium text-[#141412] hover:text-[#57554E] transition-colors"
-                    >
-                      {f.link.text}
-                    </Link>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        <p className="text-[10px] text-[#6B6A63] uppercase tracking-widest font-medium mb-8">What you get</p>
+        <div>
+          {FEATURES.map((f) => (
+            <div
+              key={f.label}
+              className="py-7 border-b border-[#E3E1DB] grid sm:grid-cols-[180px_1fr] gap-3 sm:gap-10"
+            >
+              <span className="text-[10px] text-[#6B6A63] uppercase tracking-wide font-medium pt-[3px]">{f.label}</span>
+              <div>
+                <h3 className="font-semibold text-[#141412] mb-1.5 text-[0.9375rem]">{f.title}</h3>
+                <p className="text-sm text-[#57554E] leading-relaxed">{f.desc}</p>
+                {f.link && (
+                  <Link
+                    href={f.link.href}
+                    className="inline-block mt-3 text-sm font-medium text-[#141412] hover:text-[#57554E] transition-colors"
+                  >
+                    {f.link.text}
+                  </Link>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Wishlist promo */}
       <section className="px-6 pb-20 max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45 }}
-          className="bg-white rounded-2xl border border-[#E3E1DB] p-8 sm:p-10 flex flex-col sm:flex-row gap-8 items-start"
-        >
+        <div className="bg-white rounded-2xl border border-[#E3E1DB] p-8 sm:p-10 flex flex-col sm:flex-row gap-8 items-start">
           <div className="flex-1 min-w-0">
             <p className="text-[10px] text-[#6B6A63] uppercase tracking-widest font-medium mb-3">Outfit list</p>
             <h2 className="text-2xl sm:text-[1.75rem] font-bold tracking-tight text-[#141412] mb-3 leading-tight">
@@ -278,7 +252,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Footer */}
@@ -333,6 +307,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-    </MotionConfig>
   );
 }
