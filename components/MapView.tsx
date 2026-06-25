@@ -26,7 +26,7 @@ function shopPinEl(isActive: boolean, label: string): HTMLDivElement {
     isActive ? "#141412" : "#57554E"
   };border:${isActive ? "3px" : "2px"} solid ${
     isActive ? "#ffffff" : "#EAE8E3"
-  };border-radius:50%;box-shadow:0 2px 6px rgba(20,20,18,0.25);cursor:pointer;transition:all 0.2s`;
+  };border-radius:50%;box-shadow:0 2px 6px rgba(20,20,18,0.25);cursor:pointer`;
   // Keyboard-operable, labelled pin for screen readers.
   el.setAttribute("role", "button");
   el.setAttribute("tabindex", "0");
