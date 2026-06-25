@@ -9,10 +9,11 @@ import { PageHeader, PageFooter } from "@/components/SiteChrome";
 // Regenerate at most weekly; render on demand (no build-time Overpass storm).
 export const revalidate = 604800;
 
-const CLOTHING: { shopTypes: string[]; brands: string[]; matched: boolean } = {
+const CLOTHING = {
   shopTypes: ["clothes", "shoes", "boutique", "second_hand", "fashion_accessories", "sports"],
   brands: [],
   matched: true,
+  nameMatch: null,
 };
 
 function typeLabel(t: string) {
@@ -41,7 +42,7 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
   let shops: Shop[] = [];
   let failed = false;
   try {
-    shops = await queryNearbyShops(CLOTHING, "", c.lat, c.lon, 2500);
+    shops = await queryNearbyShops(CLOTHING, c.lat, c.lon, 2500);
   } catch {
     failed = true;
   }

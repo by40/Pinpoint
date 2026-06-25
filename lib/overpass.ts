@@ -13,12 +13,16 @@ export interface Shop {
   priceRange: 1 | 2 | 3;
 }
 
-// A resolved clothing search: OSM shop types + brand names, plus whether the
-// query was actually recognised (used to decide on a name-search fallback).
+// A resolved clothing search: OSM shop types + brand names.
+// - `matched`: whether the query was recognised at all.
+// - `nameMatch`: a term to also match against shop names (used for unrecognised
+//   queries, and for retailer searches like "JD Sports" so we find the store
+//   itself by name as well as by brand tag), or null.
 export interface ResolvedQuery {
   shopTypes: string[];
   brands: string[];
   matched: boolean;
+  nameMatch: string | null;
 }
 
 // Cap on results returned to the client. City-centre clothing searches can
@@ -138,11 +142,11 @@ const USER_AGENT = "Pinpoint/1.0 (+https://pinpointapp.uk; local shop finder)";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const cache = new Map<string, { at: number; shops: Shop[] }>();
 
-function cacheKey(resolved: ResolvedQuery, query: string, lat: number, lon: number, radius: number): string {
+function cacheKey(resolved: ResolvedQuery, lat: number, lon: number, radius: number): string {
   // Round coords to ~110m so near-identical fixes share a cache entry.
   const types = [...resolved.shopTypes].sort().join(",");
   const brands = [...resolved.brands].sort().join(",");
-  const name = resolved.matched ? "" : query.toLowerCase();
+  const name = (resolved.nameMatch ?? "").toLowerCase();
   return `t:${types}|b:${brands}|n:${name}|${lat.toFixed(3)}|${lon.toFixed(3)}|${radius}`;
 }
 
@@ -181,19 +185,17 @@ async function runOverpass(ql: string): Promise<OverpassResponse> {
 
 export async function queryNearbyShops(
   resolved: ResolvedQuery,
-  query: string,
   lat: number,
   lon: number,
   radius: number
 ): Promise<Shop[]> {
-  const key = cacheKey(resolved, query, lat, lon, radius);
+  const key = cacheKey(resolved, lat, lon, radius);
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.shops;
 
-  // Name-search only when we didn't recognise the query (likely an unknown
-  // brand); recognised item/brand searches rely on shop-type + brand= filters.
-  const nameTerm = resolved.matched ? null : query;
-  const ql = buildQuery(resolved.shopTypes, resolved.brands, nameTerm, lat, lon, radius);
+  // The resolver decides whether to also match on shop name (for unrecognised
+  // queries and retailer searches); item/brand searches rely on type + brand=.
+  const ql = buildQuery(resolved.shopTypes, resolved.brands, resolved.nameMatch, lat, lon, radius);
 
   const data = await runOverpass(ql);
   const seen = new Set<string>();

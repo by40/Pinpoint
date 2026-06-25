@@ -59,7 +59,11 @@ const ITEM_MAP: Array<{ patterns: RegExp; tags: string[] }> = [
 // Each entry: keyword pattern → the OSM brand= value to match (case-insensitive,
 // substring) + the shop types that brand typically sits in, so multi-brand
 // retailers (which won't carry that brand= tag) are also surfaced.
-const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[] }> = [
+// `retailer: true` marks chains you visit as a shop (JD Sports, Zara, Primark…).
+// Searching one of those means "find that store", not "shops that stock it", so
+// we restrict those searches to the chain itself (by brand= and name) rather
+// than every nearby clothing shop.
+const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[]; retailer?: boolean }> = [
   // Sportswear & footwear brands
   { patterns: /\bnike\b/i, brand: "Nike", shopTypes: ["shoes", "sports", "clothes"] },
   { patterns: /\b(jordan|air jordan)\b/i, brand: "Jordan", shopTypes: ["shoes", "sports", "clothes"] },
@@ -85,16 +89,16 @@ const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[] }>
   { patterns: /\bcarhartt\b/i, brand: "Carhartt", shopTypes: ["clothes"] },
   { patterns: /\bdickies\b/i, brand: "Dickies", shopTypes: ["clothes"] },
 
-  // High-street fashion
-  { patterns: /\bzara\b/i, brand: "Zara", shopTypes: ["clothes"] },
-  { patterns: /\bh&?m\b/i, brand: "H&M", shopTypes: ["clothes"] },
-  { patterns: /\buniqlo\b/i, brand: "Uniqlo", shopTypes: ["clothes"] },
-  { patterns: /\bprimark\b/i, brand: "Primark", shopTypes: ["clothes"] },
-  { patterns: /\bnext\b/i, brand: "Next", shopTypes: ["clothes"] },
-  { patterns: /\b(marks ?(and|&) ?spencer|m&?s)\b/i, brand: "Marks & Spencer", shopTypes: ["clothes"] },
-  { patterns: /\b(topshop|topman)\b/i, brand: "Topshop", shopTypes: ["clothes"] },
-  { patterns: /\b(river island)\b/i, brand: "River Island", shopTypes: ["clothes"] },
-  { patterns: /\b(new look)\b/i, brand: "New Look", shopTypes: ["clothes"] },
+  // High-street fashion (own-store chains — visited as a shop)
+  { patterns: /\bzara\b/i, brand: "Zara", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\bh&?m\b/i, brand: "H&M", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\buniqlo\b/i, brand: "Uniqlo", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\bprimark\b/i, brand: "Primark", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\bnext\b/i, brand: "Next", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\b(marks ?(and|&) ?spencer|m&?s)\b/i, brand: "Marks & Spencer", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\b(topshop|topman)\b/i, brand: "Topshop", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\b(river island)\b/i, brand: "River Island", shopTypes: ["clothes"], retailer: true },
+  { patterns: /\b(new look)\b/i, brand: "New Look", shopTypes: ["clothes"], retailer: true },
 
   // Footwear specialists / boots
   { patterns: /\b(dr\.? ?martens|doc martens|docs)\b/i, brand: "Dr. Martens", shopTypes: ["shoes"] },
@@ -112,7 +116,7 @@ const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[] }>
   { patterns: /\b(calvin klein|ck)\b/i, brand: "Calvin Klein", shopTypes: ["clothes"] },
   { patterns: /\b(hugo boss|boss)\b/i, brand: "Hugo Boss", shopTypes: ["clothes", "boutique"] },
   { patterns: /\bbarbour\b/i, brand: "Barbour", shopTypes: ["clothes"] },
-  { patterns: /\bsuperdry\b/i, brand: "Superdry", shopTypes: ["clothes"] },
+  { patterns: /\bsuperdry\b/i, brand: "Superdry", shopTypes: ["clothes"], retailer: true },
   { patterns: /\b(fred perry)\b/i, brand: "Fred Perry", shopTypes: ["clothes"] },
   { patterns: /\bchampion\b/i, brand: "Champion", shopTypes: ["clothes"] },
   { patterns: /\bellesse\b/i, brand: "Ellesse", shopTypes: ["clothes", "sports"] },
@@ -123,15 +127,15 @@ const BRAND_MAP: Array<{ patterns: RegExp; brand: string; shopTypes: string[] }>
   { patterns: /\bskechers\b/i, brand: "Skechers", shopTypes: ["shoes", "sports"] },
 
   // Multi-brand retailers (the brand= value is the retailer itself)
-  { patterns: /\b(jd sports|jd)\b/i, brand: "JD Sports", shopTypes: ["shoes", "sports", "clothes"] },
-  { patterns: /\b(sports ?direct)\b/i, brand: "Sports Direct", shopTypes: ["sports", "shoes", "clothes"] },
-  { patterns: /\b(foot ?locker)\b/i, brand: "Foot Locker", shopTypes: ["shoes", "sports"] },
-  { patterns: /\bsize\?/i, brand: "size?", shopTypes: ["shoes", "clothes"] },
-  { patterns: /\bschuh\b/i, brand: "Schuh", shopTypes: ["shoes"] },
-  { patterns: /\boffice\b/i, brand: "Office", shopTypes: ["shoes"] },
-  { patterns: /\b(tk ?maxx)\b/i, brand: "TK Maxx", shopTypes: ["clothes", "shoes"] },
-  { patterns: /\bflannels\b/i, brand: "Flannels", shopTypes: ["clothes", "boutique"] },
-  { patterns: /\b(selfridges|harvey nichols|harrods)\b/i, brand: "", shopTypes: ["department_store", "boutique", "clothes"] },
+  { patterns: /\b(jd sports|jd)\b/i, brand: "JD Sports", shopTypes: ["shoes", "sports", "clothes"], retailer: true },
+  { patterns: /\b(sports ?direct)\b/i, brand: "Sports Direct", shopTypes: ["sports", "shoes", "clothes"], retailer: true },
+  { patterns: /\b(foot ?locker)\b/i, brand: "Foot Locker", shopTypes: ["shoes", "sports"], retailer: true },
+  { patterns: /\bsize\?/i, brand: "size?", shopTypes: ["shoes", "clothes"], retailer: true },
+  { patterns: /\bschuh\b/i, brand: "Schuh", shopTypes: ["shoes"], retailer: true },
+  { patterns: /\boffice\b/i, brand: "Office", shopTypes: ["shoes"], retailer: true },
+  { patterns: /\b(tk ?maxx)\b/i, brand: "TK Maxx", shopTypes: ["clothes", "shoes"], retailer: true },
+  { patterns: /\bflannels\b/i, brand: "Flannels", shopTypes: ["clothes", "boutique"], retailer: true },
+  { patterns: /\b(selfridges|harvey nichols|harrods)\b/i, brand: "", shopTypes: ["department_store", "boutique", "clothes"], retailer: true },
 ];
 
 // Default clothing shop types when a query matches nothing specific.
@@ -141,8 +145,8 @@ export function resolveQuery(query: string): ResolvedQuery {
   const itemTypes = new Set<string>();
   const brandTypes = new Set<string>();
   const brands = new Set<string>();
+  const matchedBrandEntries: typeof BRAND_MAP = [];
   let itemMatched = false;
-  let brandMatched = false;
 
   for (const { patterns, tags } of ITEM_MAP) {
     if (patterns.test(query)) {
@@ -151,28 +155,43 @@ export function resolveQuery(query: string): ResolvedQuery {
     }
   }
 
-  for (const { patterns, brand, shopTypes } of BRAND_MAP) {
-    if (patterns.test(query)) {
-      brandMatched = true;
-      if (brand) brands.add(brand);
-      shopTypes.forEach((t) => brandTypes.add(t));
+  for (const entry of BRAND_MAP) {
+    if (entry.patterns.test(query)) {
+      matchedBrandEntries.push(entry);
+      if (entry.brand) brands.add(entry.brand);
+      entry.shopTypes.forEach((t) => brandTypes.add(t));
     }
   }
+  const brandMatched = matchedBrandEntries.length > 0;
 
-  // The named item constrains the shop types: "Nike trainers" should look in
-  // shoe/sportswear shops, NOT every clothes shop (Nike is a clothing brand too,
-  // which otherwise pulled in dress/lingerie shops). Only fall back to the
-  // brand's broad categories when no specific item was named (e.g. just "Nike").
-  // With no match at all, default to general clothing shops; queryNearbyShops
-  // also name-searches the raw term in that case (to catch unknown brands).
+  // A "retailer" search (e.g. "JD Sports", "Primark") means find that store —
+  // you don't buy JD Sports *at* another shop. When the whole query is one or
+  // more retailers (and no specific item), restrict to those chains by brand=
+  // and name, instead of returning every nearby clothing shop.
+  const retailerOnly = brandMatched && !itemMatched && matchedBrandEntries.every((e) => e.retailer);
+
+  if (retailerOnly) {
+    const nameMatch = matchedBrandEntries.find((e) => e.brand)?.brand ?? query.trim();
+    return { shopTypes: [], brands: Array.from(brands), matched: true, nameMatch };
+  }
+
+  // Otherwise: the named item constrains the shop types ("Nike trainers" → shoe/
+  // sportswear shops, not every clothes shop). Fall back to the brand's broad
+  // categories only when no item was named (e.g. just "Nike"), and to general
+  // clothing shops + a name search when nothing was recognised (unknown brand).
   let shopTypes: Set<string>;
+  let nameMatch: string | null = null;
   if (itemMatched) shopTypes = itemTypes;
   else if (brandMatched) shopTypes = brandTypes;
-  else shopTypes = new Set(FALLBACK_TYPES);
+  else {
+    shopTypes = new Set(FALLBACK_TYPES);
+    nameMatch = query.trim();
+  }
 
   return {
     shopTypes: Array.from(shopTypes),
     brands: Array.from(brands),
     matched: itemMatched || brandMatched,
+    nameMatch,
   };
 }

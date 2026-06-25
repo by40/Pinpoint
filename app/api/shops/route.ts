@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const resolved = resolveQuery(q);
-    const shops = await queryNearbyShops(resolved, q, lat, lon, radius);
+    const shops = await queryNearbyShops(resolved, lat, lon, radius);
     return NextResponse.json(
       { shops, tags: resolved.shopTypes, brands: resolved.brands },
       { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
