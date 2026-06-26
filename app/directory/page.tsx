@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FEATURED_BRANDS } from "@/lib/brands";
 import { CITIES } from "@/lib/cities";
 import { PageHeader, PageFooter } from "@/components/SiteChrome";
+import { Container, Section, Kicker } from "@/components/Layout";
 
 export const metadata: Metadata = {
   title: "Directory — brands & cities",
@@ -16,35 +17,41 @@ export default function DirectoryPage() {
     <div className="min-h-screen bg-bg text-ink">
       <PageHeader />
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1] mb-4">Directory</h1>
-        <p className="text-[1.0625rem] text-muted leading-relaxed mb-10 max-w-xl">
+      {/* Editorial hero */}
+      <Section band="panel" className="border-b-2 border-ink pt-8 pb-10">
+        <Kicker className="text-accent mb-4 block">The index</Kicker>
+        <h1 className="font-display font-bold uppercase tracking-[-0.02em] leading-[0.9] text-[clamp(2.6rem,7vw,5rem)] mb-5">
+          Directory
+        </h1>
+        <p className="text-[1.0625rem] text-muted leading-relaxed max-w-xl">
           Browse by brand or by city. Each page helps you find nearby shops likely to stock what you&apos;re after — then
           opens the live map to search around you.
         </p>
+      </Section>
 
-        <section className="mb-12">
-          <h2 className="text-base font-bold tracking-tight mb-4">Brands</h2>
-          <div className="flex flex-wrap gap-2">
+      <Container size="default" className="py-12 space-y-12">
+        <section id="brands" className="scroll-mt-28">
+          <Kicker index={1} className="text-faint mb-4 block">Brands · {FEATURED_BRANDS.length}</Kicker>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 border-t border-l border-line">
             {FEATURED_BRANDS.map((b) => (
-              <Link key={b.slug} href={`/brand/${b.slug}`} className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">
+              <Link key={b.slug} href={`/brand/${b.slug}`} className="border-r border-b border-line px-4 py-3 text-sm font-medium text-ink hover:bg-accent hover:text-on-accent transition-colors">
                 {b.name}
               </Link>
             ))}
           </div>
         </section>
 
-        <section>
-          <h2 className="text-base font-bold tracking-tight mb-4">Clothing shops by city</h2>
-          <div className="flex flex-wrap gap-2">
+        <section id="cities" className="scroll-mt-28">
+          <Kicker index={2} className="text-faint mb-4 block">Clothing shops by city · {CITIES.length}</Kicker>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 border-t border-l border-line">
             {CITIES.map((c) => (
-              <Link key={c.slug} href={`/clothes-shops/${c.slug}`} className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">
+              <Link key={c.slug} href={`/clothes-shops/${c.slug}`} className="border-r border-b border-line px-4 py-3 text-sm font-medium text-ink hover:bg-accent hover:text-on-accent transition-colors">
                 {c.name}
               </Link>
             ))}
           </div>
         </section>
-      </main>
+      </Container>
 
       <PageFooter />
     </div>

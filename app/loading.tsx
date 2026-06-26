@@ -8,7 +8,7 @@ export default function Loading() {
             <circle cx="12" cy="9" r="2.5" />
           </svg>
         </div>
-        <span className="text-sm text-faint">Loading…</span>
+        <span className="kicker text-faint">Loading…</span>
       </div>
     </div>
   );

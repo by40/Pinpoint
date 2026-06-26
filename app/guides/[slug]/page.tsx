@@ -5,6 +5,7 @@ import { GUIDES, getGuide } from "@/lib/guides";
 import { getBrand } from "@/lib/brands";
 import { getCity } from "@/lib/cities";
 import { PageHeader, PageFooter } from "@/components/SiteChrome";
+import { Container, Section, Kicker } from "@/components/Layout";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pinpointapp.uk";
 
@@ -64,37 +65,41 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <PageHeader />
 
-      <main className="max-w-2xl mx-auto px-6 py-12">
-        <nav className="text-xs text-faint mb-6">
-          <Link href="/" className="hover:text-accent">Home</Link> ·{" "}
+      {/* Editorial hero */}
+      <Section band="panel" size="narrow" className="border-b-2 border-ink pt-8 pb-10">
+        <nav className="kicker text-faint mb-5">
+          <Link href="/" className="hover:text-accent">Home</Link> /{" "}
           <Link href="/guides" className="hover:text-accent">Guides</Link>
         </nav>
+        <Kicker className="text-accent mb-4 block">Guide</Kicker>
+        <h1 className="font-display font-bold uppercase tracking-[-0.02em] leading-[0.95] text-[clamp(2rem,5vw,3.25rem)] mb-3">{guide.title}</h1>
+        <p className="kicker text-faint">Updated 25 June 2026</p>
+      </Section>
 
-        <h1 className="text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1] mb-3">{guide.title}</h1>
-        <p className="text-xs text-faint mb-8">Updated 25 June 2026</p>
+      <Container size="narrow" className="py-12">
+        <p className="text-[1.0625rem] text-muted leading-relaxed mb-10">{guide.intro}</p>
 
-        <p className="text-[1.0625rem] text-muted leading-relaxed mb-8">{guide.intro}</p>
-
-        {guide.sections.map((s) => (
-          <section key={s.heading} className="mb-8">
-            <h2 className="text-lg font-bold tracking-tight text-ink mb-2">{s.heading}</h2>
+        {guide.sections.map((s, i) => (
+          <section key={s.heading} className="mb-10">
+            <Kicker index={i + 1} className="text-faint mb-2 block" />
+            <h2 className="font-display text-xl font-bold tracking-tight text-ink mb-3">{s.heading}</h2>
             <div className="space-y-3">
-              {s.paras.map((p, i) => (
-                <p key={i} className="text-sm text-muted leading-relaxed">{p}</p>
+              {s.paras.map((p, j) => (
+                <p key={j} className="text-sm text-muted leading-relaxed">{p}</p>
               ))}
             </div>
           </section>
         ))}
 
         {/* Try these searches */}
-        <section className="mb-8 p-5 rounded-2xl border border-line bg-surface">
-          <h2 className="text-sm font-bold tracking-tight mb-3">Try these searches</h2>
+        <section className="mb-10 bg-ink text-white rounded-2xl p-6 sm:p-7">
+          <Kicker className="text-accent mb-3 block">Try these searches</Kicker>
           <div className="flex flex-wrap gap-2">
             {guide.searches.map((q) => (
               <Link
                 key={q}
                 href={`/search?q=${encodeURIComponent(q)}`}
-                className="text-sm text-muted hover:text-accent bg-bg hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors"
+                className="text-sm font-medium text-white hover:text-ink bg-white/10 hover:bg-white border border-white/20 px-3 py-1.5 rounded-full transition-colors"
               >
                 {q}
               </Link>
@@ -102,7 +107,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           </div>
           <Link
             href="/search"
-            className="inline-flex items-center gap-2 mt-4 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
+            className="inline-flex items-center gap-2 mt-5 bg-accent hover:bg-accent-hover text-on-accent font-bold uppercase tracking-wide px-5 py-3 rounded-xl text-sm transition-colors"
           >
             Open the live map →
           </Link>
@@ -110,23 +115,23 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
 
         {/* Related internal links */}
         {(brands.length > 0 || cities.length > 0) && (
-          <section className="mb-8">
+          <section className="mb-10 space-y-6">
             {brands.length > 0 && (
-              <div className="mb-4">
-                <h2 className="text-[10px] uppercase tracking-widest text-faint font-medium mb-2">Related brands</h2>
+              <div>
+                <Kicker className="text-faint mb-3 block">Related brands</Kicker>
                 <div className="flex flex-wrap gap-2">
                   {brands.map((b) => (
-                    <Link key={b.slug} href={`/brand/${b.slug}`} className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">{b.name}</Link>
+                    <Link key={b.slug} href={`/brand/${b.slug}`} className="text-sm font-medium text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">{b.name}</Link>
                   ))}
                 </div>
               </div>
             )}
             {cities.length > 0 && (
               <div>
-                <h2 className="text-[10px] uppercase tracking-widest text-faint font-medium mb-2">Browse by city</h2>
+                <Kicker className="text-faint mb-3 block">Browse by city</Kicker>
                 <div className="flex flex-wrap gap-2">
                   {cities.map((c) => (
-                    <Link key={c.slug} href={`/clothes-shops/${c.slug}`} className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">{c.name}</Link>
+                    <Link key={c.slug} href={`/clothes-shops/${c.slug}`} className="text-sm font-medium text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">{c.name}</Link>
                   ))}
                 </div>
               </div>
@@ -135,17 +140,19 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
         )}
 
         {/* More guides */}
-        <section className="pt-8 border-t border-line">
-          <h2 className="text-[10px] uppercase tracking-widest text-faint font-medium mb-3">More guides</h2>
-          <ul className="space-y-2">
+        <section className="pt-8 border-t-2 border-ink">
+          <Kicker className="text-faint mb-4 block">More guides</Kicker>
+          <ul className="divide-y divide-line border-t border-line">
             {others.map((g) => (
               <li key={g.slug}>
-                <Link href={`/guides/${g.slug}`} className="text-sm font-medium text-ink hover:text-muted underline underline-offset-2 transition-colors">{g.title}</Link>
+                <Link href={`/guides/${g.slug}`} className="flex items-center justify-between gap-3 py-3 text-sm font-display font-bold text-ink hover:text-accent transition-colors">
+                  {g.title} <span aria-hidden>→</span>
+                </Link>
               </li>
             ))}
           </ul>
         </section>
-      </main>
+      </Container>
 
       <PageFooter />
     </div>

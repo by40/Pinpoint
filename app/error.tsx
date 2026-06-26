@@ -22,20 +22,21 @@ export default function Error({
           <circle cx="12" cy="9" r="2.5" />
         </svg>
       </div>
-      <h1 className="text-2xl font-bold tracking-tight mb-2">Something went wrong</h1>
+      <p className="kicker text-accent mb-3">System error</p>
+      <h1 className="font-display font-bold uppercase tracking-[-0.02em] leading-[0.9] text-[clamp(2.2rem,7vw,4rem)] mb-3">Something went wrong</h1>
       <p className="text-sm text-muted max-w-sm leading-relaxed mb-8">
         This is usually temporary — the live map data service can be briefly unavailable. Try again in a moment.
       </p>
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={reset}
-          className="bg-accent hover:bg-accent-hover text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors"
+          className="bg-accent hover:bg-accent-hover text-on-accent font-bold uppercase tracking-wide px-6 py-3 rounded-xl text-sm transition-colors"
         >
           Try again
         </button>
         <Link
           href="/"
-          className="bg-surface hover:bg-panel text-ink border border-line font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors"
+          className="bg-surface hover:bg-panel text-ink border-2 border-ink font-bold uppercase tracking-wide px-6 py-3 rounded-xl text-sm transition-colors"
         >
           Back home
         </Link>

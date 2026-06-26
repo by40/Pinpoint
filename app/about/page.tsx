@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader, PageFooter } from "@/components/SiteChrome";
+import { Container, Section, Kicker } from "@/components/Layout";
 
 export const metadata: Metadata = {
   title: "About & FAQ",
@@ -48,47 +49,52 @@ export default function AboutPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <PageHeader />
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1] mb-4">About Pinpoint</h1>
-        <p className="text-[1.0625rem] text-muted leading-relaxed mb-10 max-w-xl">
+      {/* Editorial hero */}
+      <Section band="panel" className="border-b-2 border-ink pt-8 pb-10">
+        <Kicker className="text-accent mb-4 block">The manifesto</Kicker>
+        <h1 className="font-display font-bold uppercase tracking-[-0.02em] leading-[0.9] text-[clamp(2.4rem,6.5vw,4.75rem)] mb-5">
+          Shop local,<br />not <span className="text-accent">default online</span>
+        </h1>
+        <p className="text-[1.0625rem] text-muted leading-relaxed max-w-xl">
           Pinpoint helps you find the clothes and brands you want in shops near you — a fast, private way to shop local
           instead of defaulting to online.
         </p>
+      </Section>
 
-        <section className="mb-10">
-          <h2 className="text-base font-bold tracking-tight mb-4">How it works</h2>
-          <ol className="space-y-3">
+      <Container size="default" className="py-12 space-y-12">
+        <section>
+          <Kicker index={1} className="text-faint mb-4 block">How it works</Kicker>
+          <div className="grid sm:grid-cols-3 border-t-2 border-l-2 border-ink">
             {[
               ["Search a brand or item", "Type something like “Adidas Sambas”, “a denim jacket” or “Dr. Martens”."],
               ["Share your location", "Allow location or enter a town/postcode — your location is never stored."],
               ["See nearby shops on a map", "Results are mapped in 3D and sorted by distance, with brand stores first."],
             ].map(([t, d], i) => (
-              <li key={t} className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-accent text-white text-xs font-semibold flex items-center justify-center">{i + 1}</span>
-                <div>
-                  <h3 className="text-sm font-semibold text-ink">{t}</h3>
-                  <p className="text-sm text-muted leading-relaxed">{d}</p>
-                </div>
-              </li>
+              <div key={t} className="border-r-2 border-b-2 border-ink p-6">
+                <span className="font-display font-bold text-3xl text-accent">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="font-display text-base font-bold text-ink mt-3 mb-1">{t}</h3>
+                <p className="text-sm text-muted leading-relaxed">{d}</p>
+              </div>
             ))}
-          </ol>
+          </div>
         </section>
 
-        <section className="mb-10 p-5 rounded-2xl border border-line bg-surface">
-          <h2 className="text-base font-bold tracking-tight mb-2">An honest note on accuracy</h2>
-          <p className="text-sm text-muted leading-relaxed">
+        <section className="bg-ink text-white rounded-2xl p-7 sm:p-8">
+          <Kicker className="text-accent mb-3 block">Straight up</Kicker>
+          <h2 className="font-display text-xl font-bold tracking-tight mb-2">An honest note on accuracy</h2>
+          <p className="text-sm text-white/75 leading-relaxed max-w-2xl">
             Pinpoint uses community OpenStreetMap data, which has no live inventory. So results are shops{" "}
-            <strong className="text-ink font-semibold">likely</strong> to sell what you searched — not a guarantee
+            <strong className="text-white font-semibold">likely</strong> to sell what you searched — not a guarantee
             it&apos;s in stock. Listings can be incomplete or out of date; always confirm with the shop.
           </p>
         </section>
 
-        <section className="mb-10">
-          <h2 className="text-base font-bold tracking-tight mb-4">FAQ</h2>
-          <div className="space-y-5">
+        <section className="max-w-2xl">
+          <Kicker index={2} className="text-faint mb-4 block">FAQ</Kicker>
+          <div className="divide-y divide-line border-t border-line">
             {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-sm font-semibold text-ink mb-1">{f.q}</h3>
+              <div key={f.q} className="py-4">
+                <h3 className="font-display text-base font-bold text-ink mb-1.5">{f.q}</h3>
                 <p className="text-sm text-muted leading-relaxed">{f.a}</p>
               </div>
             ))}
@@ -97,11 +103,11 @@ export default function AboutPage() {
 
         <Link
           href="/search"
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors"
+          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-on-accent font-bold uppercase tracking-wide px-6 py-3.5 rounded-xl text-sm transition-colors"
         >
           Start searching →
         </Link>
-      </main>
+      </Container>
 
       <PageFooter />
     </div>

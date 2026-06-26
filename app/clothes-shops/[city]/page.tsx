@@ -5,6 +5,7 @@ import { CITIES, getCity } from "@/lib/cities";
 import { FEATURED_BRANDS } from "@/lib/brands";
 import { queryNearbyShops, type Shop } from "@/lib/overpass";
 import { PageHeader, PageFooter } from "@/components/SiteChrome";
+import { Container, Section, Kicker } from "@/components/Layout";
 
 // Regenerate at most weekly; render on demand (no build-time Overpass storm).
 export const revalidate = 604800;
@@ -88,32 +89,34 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <PageHeader />
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
-        <nav className="text-xs text-faint mb-6">
-          <Link href="/" className="hover:text-accent">Home</Link> ·{" "}
-          <Link href="/directory" className="hover:text-accent">Cities</Link> ·{" "}
-          <span className="text-muted">{c.name}</span>
+      {/* Editorial hero */}
+      <Section band="panel" className="border-b-2 border-ink pt-8 pb-10">
+        <nav className="kicker text-faint mb-5">
+          <Link href="/" className="hover:text-accent">Home</Link> /{" "}
+          <Link href="/directory#cities" className="hover:text-accent">Cities</Link> /{" "}
+          <span className="text-ink">{c.name}</span>
         </nav>
-
-        <h1 className="text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1] mb-4">
-          Clothing shops in {c.name}
+        <Kicker className="text-accent mb-4 block">City guide</Kicker>
+        <h1 className="font-display font-bold uppercase tracking-[-0.02em] leading-[0.92] text-[clamp(2.4rem,6vw,4.5rem)] mb-5">
+          Clothing shops<br />in <span className="text-accent">{c.name}</span>
         </h1>
         <p className="text-[1.0625rem] text-muted leading-relaxed mb-6 max-w-xl">
           A snapshot of clothing, shoe and fashion shops around {c.name}, from community OpenStreetMap data. Want a
           specific brand or item? Open the live map and search — it&apos;ll find what&apos;s near you and sort by distance.
         </p>
-
         <Link
           href="/search"
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors"
+          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-on-accent font-bold uppercase tracking-wide px-6 py-3.5 rounded-xl text-sm transition-colors"
         >
           Search clothes near you →
         </Link>
+      </Section>
 
-        <section className="mt-10">
-          <h2 className="text-base font-bold tracking-tight mb-4">
-            {shown.length > 0 ? `${shown.length} shops around ${c.name} centre` : `Shops in ${c.name}`}
-          </h2>
+      <Container size="default" className="py-12 space-y-12">
+        <section>
+          <Kicker index={1} className="text-faint mb-4 block">
+            {shown.length > 0 ? `${shown.length} shops · ${c.name} centre` : `Shops in ${c.name}`}
+          </Kicker>
 
           {failed || shown.length === 0 ? (
             <p className="text-sm text-faint leading-relaxed">
@@ -122,12 +125,12 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
               to find clothing shops near you.
             </p>
           ) : (
-            <ul className="grid sm:grid-cols-2 gap-2">
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
               {shown.map((s) => (
-                <li key={s.id} className="rounded-xl border border-line bg-surface p-3">
+                <li key={s.id} className="rounded-xl border-2 border-ink bg-surface p-3.5">
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-sm font-semibold text-ink leading-tight">{s.name}</span>
-                    <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-panel text-muted border border-line">
+                    <span className="text-sm font-bold text-ink leading-tight">{s.name}</span>
+                    <span className="shrink-0 text-[9px] font-mono uppercase tracking-wide px-2 py-0.5 rounded-full bg-panel text-muted border border-line">
                       {typeLabel(s.shopType)}
                     </span>
                   </div>
@@ -138,25 +141,25 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
           )}
         </section>
 
-        <section className="mt-12 pt-8 border-t border-line">
-          <h2 className="text-[10px] uppercase tracking-widest text-faint font-medium mb-3">Popular brands</h2>
-          <div className="flex flex-wrap gap-2 mb-8">
+        <section className="pt-8 border-t-2 border-ink">
+          <Kicker index={2} className="text-faint mb-4 block">Popular brands</Kicker>
+          <div className="flex flex-wrap gap-2 mb-10">
             {FEATURED_BRANDS.slice(0, 10).map((b) => (
-              <Link key={b.slug} href={`/brand/${b.slug}`} className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">
+              <Link key={b.slug} href={`/brand/${b.slug}`} className="text-sm font-medium text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">
                 {b.name}
               </Link>
             ))}
           </div>
-          <h2 className="text-[10px] uppercase tracking-widest text-faint font-medium mb-3">Other cities</h2>
+          <Kicker index={3} className="text-faint mb-4 block">Other cities</Kicker>
           <div className="flex flex-wrap gap-2">
             {otherCities.map((x) => (
-              <Link key={x.slug} href={`/clothes-shops/${x.slug}`} className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">
+              <Link key={x.slug} href={`/clothes-shops/${x.slug}`} className="text-sm font-medium text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">
                 {x.name}
               </Link>
             ))}
           </div>
         </section>
-      </main>
+      </Container>
 
       <PageFooter />
     </div>

@@ -198,21 +198,20 @@ function SearchApp() {
   return (
     <div className="flex flex-col min-h-[100dvh] md:h-screen bg-bg text-ink overflow-x-hidden md:overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 px-5 py-3 border-b border-line flex items-center gap-3 bg-surface sticky top-0 z-30 md:static">
+      <header className="shrink-0 px-5 py-3 border-b-2 border-ink flex items-center gap-3 bg-surface sticky top-0 z-30 md:static">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded bg-accent flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-md bg-accent flex items-center justify-center shrink-0">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
               <circle cx="12" cy="9" r="2.5" />
             </svg>
           </div>
-          <span className="font-semibold text-ink">Pinpoint</span>
+          <span className="font-display font-bold uppercase tracking-tight text-ink">Pinpoint</span>
         </Link>
-        <span className="text-faint text-sm hidden sm:block">·</span>
-        <span className="text-muted text-sm hidden sm:block">Find clothes & brands near you</span>
+        <span className="kicker text-faint hidden sm:block ml-1">Find clothes near you</span>
         <div className="ml-auto flex items-center gap-4">
           <SoundToggle />
-          <Link href="/wishlist" className="flex items-center gap-1.5 text-sm text-muted hover:text-accent transition-colors">
+          <Link href="/wishlist" className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wide text-muted hover:text-accent transition-colors">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
               <rect x="9" y="3" width="6" height="4" rx="1" />

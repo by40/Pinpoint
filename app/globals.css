@@ -56,6 +56,42 @@ h1, h2, h3 {
   animation: fadeUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* ── Editorial "Loud Streetwear" layout helpers ──────────────────────────── */
+
+/* Mono uppercase eyebrow/kicker label used to tag sections. */
+.kicker {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+/* Rotated sticker badge. */
+.stamp {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: inline-block;
+  transform: rotate(-5deg);
+}
+
+/* Scrolling marquee ticker (pure CSS, no JS). The track holds two identical
+   copies so the loop is seamless; it translates by exactly -50%. */
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.marquee-track {
+  display: inline-flex;
+  width: max-content;
+  animation: marqueeScroll 30s linear infinite;
+}
+
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -65,5 +101,10 @@ h1, h2, h3 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  /* Freeze the ticker in place rather than snapping it half-off. */
+  .marquee-track {
+    animation: none !important;
+    transform: none !important;
   }
 }

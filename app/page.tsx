@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { PageHeader, PageFooter } from "@/components/SiteChrome";
+import { Section, Kicker, Stamp } from "@/components/Layout";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pinpointapp.uk";
 
@@ -125,37 +127,19 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(APP_JSON_LD) }}
       />
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-bg/90 backdrop-blur-sm border-b border-line px-6 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-              <circle cx="12" cy="9" r="2.5" />
-            </svg>
-          </div>
-          <span className="font-display font-bold text-base tracking-tight">Pinpoint</span>
-        </div>
-        <div className="flex items-center gap-5">
-          <Link href="/wishlist" className="text-sm font-medium text-muted hover:text-ink transition-colors hidden sm:block">
-            Wishlist
-          </Link>
-          <Link href="/search" className="text-sm bg-accent hover:bg-accent-hover text-on-accent font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">
-            Open App
-          </Link>
-        </div>
-      </header>
+      <PageHeader />
 
       {/* Hero */}
-      <section className="px-6 pt-16 pb-12 max-w-6xl mx-auto">
+      <Section size="wide" className="pt-12 pb-14 sm:pt-16">
         <div className="grid md:grid-cols-[1fr_380px] gap-10 xl:gap-16 items-center fade-up">
           <div>
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent bg-accent-soft px-3 py-1 rounded-full mb-5">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-              Free · no account · UK shops
-            </span>
-            <h1 className="font-display text-[clamp(2.8rem,6vw,5rem)] font-bold leading-[1.02] tracking-[-0.02em] text-ink mb-5">
-              Find the <span className="text-accent">clothes</span><br />you want, nearby.
+            <div className="flex items-center gap-3 mb-6">
+              <Kicker className="text-accent">Local clothing index</Kicker>
+              <span className="h-px flex-1 bg-line" />
+              <Stamp className="text-accent border-accent">Free</Stamp>
+            </div>
+            <h1 className="font-display font-bold uppercase leading-[0.92] tracking-[-0.02em] text-ink text-[clamp(3rem,8vw,6rem)] mb-6">
+              Find the<br /><span className="text-accent">clothes</span> you<br />want, nearby.
             </h1>
             <p className="text-[1.0625rem] text-muted leading-relaxed mb-7 max-w-md">
               Search a brand or a clothing item and see the local shops likely to sell it — powered by
@@ -164,7 +148,7 @@ export default function LandingPage() {
             <div className="flex flex-wrap items-center gap-3 mb-6">
               <Link
                 href="/search"
-                className="bg-accent hover:bg-accent-hover text-on-accent font-bold px-7 py-3 rounded-xl text-sm transition-colors shadow-[0_8px_24px_-8px_rgba(107,43,242,0.6)]"
+                className="bg-accent hover:bg-accent-hover text-on-accent font-bold uppercase tracking-wide px-7 py-3.5 rounded-xl text-sm transition-colors shadow-[0_8px_24px_-8px_rgba(107,43,242,0.6)]"
               >
                 Start searching →
               </Link>
@@ -189,49 +173,59 @@ export default function LandingPage() {
             <AppMockup />
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* Features */}
-      <section className="px-6 py-16 max-w-6xl mx-auto border-t border-line">
-        <p className="text-[11px] text-accent uppercase tracking-widest font-bold mb-8">What you get</p>
-        <div>
-          {FEATURES.map((f) => (
-            <div
-              key={f.label}
-              className="py-7 border-b border-line grid sm:grid-cols-[180px_1fr] gap-3 sm:gap-10"
-            >
-              <span className="text-[11px] text-faint uppercase tracking-wide font-bold pt-[3px]">{f.label}</span>
-              <div>
-                <h3 className="font-display font-bold text-ink mb-1.5 text-[1.0625rem] tracking-tight">{f.title}</h3>
-                <p className="text-sm text-muted leading-relaxed">{f.desc}</p>
-                {f.link && (
-                  <Link
-                    href={f.link.href}
-                    className="inline-block mt-3 text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
-                  >
-                    {f.link.text}
-                  </Link>
-                )}
-              </div>
+      {/* Stats band */}
+      <Section band="ink" className="border-y-2 border-ink" innerClassName="py-5">
+        <div className="grid grid-cols-3 divide-x divide-white/15 text-center">
+          {[["40+", "Brands"], ["38", "UK cities"], ["3D", "Live map"]].map(([big, label]) => (
+            <div key={label} className="px-2">
+              <div className="font-display font-bold text-2xl sm:text-3xl">{big}</div>
+              <div className="kicker text-white/50 mt-1">{label}</div>
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
-      {/* Wishlist promo */}
-      <section className="px-6 pb-20 max-w-6xl mx-auto">
-        <div className="bg-accent rounded-3xl p-8 sm:p-10 flex flex-col sm:flex-row gap-8 items-start text-on-accent">
+      {/* Features — numbered grid */}
+      <Section size="wide" className="py-16">
+        <Kicker className="text-accent mb-8 block">What you get</Kicker>
+        <div className="grid sm:grid-cols-2 border-t-2 border-l-2 border-ink">
+          {FEATURES.map((f, i) => (
+            <div key={f.label} className="border-r-2 border-b-2 border-ink p-6 sm:p-8">
+              <div className="flex items-center justify-between mb-4">
+                <Kicker className="text-faint">{f.label}</Kicker>
+                <span className="font-display font-bold text-3xl text-line">{String(i + 1).padStart(2, "0")}</span>
+              </div>
+              <h3 className="font-display font-bold text-ink mb-2 text-xl tracking-tight leading-snug">{f.title}</h3>
+              <p className="text-sm text-muted leading-relaxed">{f.desc}</p>
+              {f.link && (
+                <Link
+                  href={f.link.href}
+                  className="inline-block mt-4 text-sm font-bold uppercase tracking-wide text-accent hover:text-accent-hover transition-colors"
+                >
+                  {f.link.text}
+                </Link>
+              )}
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Wishlist promo — full-bleed accent band */}
+      <Section band="accent" className="py-14 sm:py-16">
+        <div className="flex flex-col sm:flex-row gap-8 items-start">
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] text-white/70 uppercase tracking-widest font-bold mb-3">Outfit list</p>
-            <h2 className="font-display text-2xl sm:text-[1.85rem] font-bold tracking-tight mb-3 leading-tight">
-              Putting an outfit together?<br className="hidden sm:block" /> Find every piece in one go.
+            <Kicker className="text-white/70 mb-3 block">Outfit list</Kicker>
+            <h2 className="font-display font-bold uppercase tracking-tight mb-3 leading-[0.95] text-[clamp(1.8rem,4vw,2.75rem)]">
+              Building an outfit?<br className="hidden sm:block" /> Find every piece in one go.
             </h2>
             <p className="text-sm text-white/80 leading-relaxed mb-6 max-w-sm">
               Add trainers, a denim jacket, a band tee — whatever you&apos;re after. Pinpoint searches for every item simultaneously and maps the nearest shops for each.
             </p>
             <Link
               href="/wishlist"
-              className="inline-flex items-center gap-2 bg-surface hover:bg-panel text-ink font-bold px-5 py-2.5 rounded-xl text-sm transition-colors"
+              className="inline-flex items-center gap-2 bg-surface hover:bg-panel text-ink font-bold uppercase tracking-wide px-5 py-3 rounded-xl text-sm transition-colors"
             >
               Build your list →
             </Link>
@@ -239,7 +233,7 @@ export default function LandingPage() {
 
           {/* Mini outfit-list preview */}
           <div className="w-full sm:w-52 shrink-0 bg-surface rounded-2xl p-4 text-ink">
-            <p className="text-[9px] text-faint uppercase tracking-widest font-bold mb-3">My list</p>
+            <p className="kicker text-faint mb-3">My list</p>
             {[
               { name: "Nike trainers", count: 12 },
               { name: "denim jacket", count: 5 },
@@ -257,60 +251,9 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* Footer */}
-      <footer className="border-t border-line px-6 py-10">
-        <div className="max-w-6xl mx-auto flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-accent flex items-center justify-center">
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                  <circle cx="12" cy="9" r="2.5" />
-                </svg>
-              </div>
-              <span className="font-display text-sm font-bold">Pinpoint</span>
-            </div>
-            <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-muted">
-              <Link href="/search" className="hover:text-accent transition-colors">Search</Link>
-              <Link href="/directory" className="hover:text-accent transition-colors">Directory</Link>
-              <Link href="/guides" className="hover:text-accent transition-colors">Guides</Link>
-              <Link href="/about" className="hover:text-accent transition-colors">About</Link>
-              <Link href="/wishlist" className="hover:text-accent transition-colors">Wishlist</Link>
-              <Link href="/privacy" className="hover:text-accent transition-colors">Privacy</Link>
-              <Link href="/terms" className="hover:text-accent transition-colors">Terms</Link>
-            </nav>
-          </div>
-          <div className="text-xs text-faint leading-relaxed">
-            <span className="text-muted font-semibold">Popular brands:</span>{" "}
-            {[
-              ["Nike", "nike"], ["Adidas", "adidas"], ["New Balance", "new-balance"],
-              ["Dr. Martens", "dr-martens"], ["Levi's", "levis"], ["The North Face", "the-north-face"],
-              ["Carhartt", "carhartt"], ["JD Sports", "jd-sports"],
-            ].map(([name, slug], i, arr) => (
-              <span key={slug}>
-                <Link href={`/brand/${slug}`} className="hover:text-accent underline underline-offset-2 transition-colors">{name}</Link>
-                {i < arr.length - 1 ? " · " : ""}
-              </span>
-            ))}
-            {" · "}
-            <Link href="/directory" className="hover:text-accent underline underline-offset-2 transition-colors">all brands & cities</Link>
-          </div>
-          <p className="text-xs text-faint leading-relaxed max-w-2xl">
-            Map data ©{" "}
-            <a href="https://openstreetmap.org" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-accent transition-colors">
-              OpenStreetMap
-            </a>{" "}
-            contributors; tiles by{" "}
-            <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-accent transition-colors">
-              OpenFreeMap
-            </a>
-            . Results are nearby shops likely to stock a brand or item based on community data — not confirmed
-            stock. Listings and price estimates may be incomplete or out of date; always confirm with the shop.
-          </p>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }
