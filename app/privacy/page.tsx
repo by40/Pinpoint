@@ -137,8 +137,8 @@ export default function PrivacyPage() {
         <Section title="Changes &amp; contact">
           <p>
             If this policy changes, we&apos;ll update the date above. Questions about privacy? Email{" "}
-            <a href="mailto:hello@pinpointapp.uk" className="text-[#141412] underline underline-offset-2 hover:text-[#57554E]">
-              hello@pinpointapp.uk
+            <a href="mailto:info@pinpointapp.uk" className="text-[#141412] underline underline-offset-2 hover:text-[#57554E]">
+              info@pinpointapp.uk
             </a>
             .
           </p>

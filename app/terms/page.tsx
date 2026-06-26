@@ -113,8 +113,8 @@ export default function TermsPage() {
             We may update these terms; if we do, we&apos;ll change the date above. These terms are governed by the laws
             of England and Wales, and any disputes are subject to the exclusive jurisdiction of its courts. Questions?
             Email{" "}
-            <a href="mailto:hello@pinpointapp.uk" className="text-[#141412] underline underline-offset-2 hover:text-[#57554E]">
-              hello@pinpointapp.uk
+            <a href="mailto:info@pinpointapp.uk" className="text-[#141412] underline underline-offset-2 hover:text-[#57554E]">
+              info@pinpointapp.uk
             </a>
             .
           </p>
