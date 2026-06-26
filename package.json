@@ -14,6 +14,7 @@
     "framer-motion": "^12.41.0",
     "maplibre-gl": "^5.24.0",
     "next": "16.2.9",
+    "opening_hours": "^3.13.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },

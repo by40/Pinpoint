@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
+import { track } from "@vercel/analytics";
 import ShopCard from "@/components/ShopCard";
 import SoundToggle from "@/components/SoundToggle";
 import * as sounds from "@/lib/sounds";
@@ -78,6 +79,7 @@ export default function WishlistPage() {
     if (!t || items.length >= MAX_ITEMS || items.some((i) => i.text.toLowerCase() === t.toLowerCase())) return;
     setItems((prev) => [...prev, { id: crypto.randomUUID(), text: t }]);
     setInput("");
+    track("wishlist_add");
   }
 
   const atItemLimit = items.length >= MAX_ITEMS;

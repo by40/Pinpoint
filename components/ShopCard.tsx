@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { track } from "@vercel/analytics";
 import { formatDistance, type Shop } from "@/lib/overpass";
+import type { OpenState } from "@/lib/openNow";
 
 function typeLabel(t: string) {
   return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -11,10 +13,11 @@ interface Props {
   shop: Shop;
   index: number;
   active: boolean;
+  openState?: OpenState;
   onClick: () => void;
 }
 
-export default function ShopCard({ shop, index, active, onClick }: Props) {
+export default function ShopCard({ shop, index, active, openState, onClick }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -72,6 +75,15 @@ export default function ShopCard({ shop, index, active, onClick }: Props) {
           </span>
         </span>
 
+        {(openState === "open" || openState === "closed") && (
+          <span className="inline-flex items-center gap-1 text-xs font-medium">
+            <span className={`w-1.5 h-1.5 rounded-full ${openState === "open" ? "bg-[#3F8A5B]" : "bg-[#B9B6AD]"}`} />
+            <span className={openState === "open" ? "text-[#3F8A5B]" : "text-[#9B988F]"}>
+              {openState === "open" ? "Open" : "Closed"}
+            </span>
+          </span>
+        )}
+
         {shop.openingHours && (
           <span className="text-[#6B6A63] text-xs truncate max-w-[140px]" title={shop.openingHours}>
             {shop.openingHours}
@@ -82,7 +94,10 @@ export default function ShopCard({ shop, index, active, onClick }: Props) {
           href={`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lon}`}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            track("directions");
+          }}
           className="text-xs text-[#57554E] hover:text-[#141412] hover:underline transition-colors"
         >
           Directions

@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useCallback, useRef, useMemo, Suspense } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
+import { track } from "@vercel/analytics";
 import SearchBar from "@/components/SearchBar";
 import ShopCard from "@/components/ShopCard";
 import SoundToggle from "@/components/SoundToggle";
 import * as sounds from "@/lib/sounds";
 import type { Shop } from "@/lib/overpass";
+import { computeOpenStates, type OpenState } from "@/lib/openNow";
 
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
@@ -33,6 +35,8 @@ function SearchApp() {
   const [matchedTags, setMatchedTags] = useState<string[]>([]);
   const [matchedBrands, setMatchedBrands] = useState<string[]>([]);
   const [brandOnly, setBrandOnly] = useState(false);
+  const [openNow, setOpenNow] = useState(false);
+  const [openStates, setOpenStates] = useState<Record<string, OpenState>>({});
   const [rejected, setRejected] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const [shareLabel, setShareLabel] = useState("Share");
@@ -68,6 +72,8 @@ function SearchApp() {
     setWidenedNote(null);
     setRejected(false);
     setTimedOut(false);
+    setOpenNow(false);
+    setOpenStates({});
     sounds.playStart();
     sounds.startLoadingLoop();
 
@@ -99,6 +105,8 @@ function SearchApp() {
       setBrandOnly(false);
       // Reflect the query in the URL so the search is shareable/bookmarkable.
       router.replace(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false });
+      if (data.rejected) track("search_rejected", { q: searchQuery });
+      else track("search", { q: searchQuery, results: data.shops?.length ?? 0 });
       if ((data.shops?.length ?? 0) > 0) sounds.playSuccess();
       else sounds.playEmpty();
     } catch (err) {
@@ -111,6 +119,7 @@ function SearchApp() {
         setBrandOnly(false);
         setTimedOut(true);
         router.replace(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false });
+        track("search_timeout", { q: searchQuery });
         sounds.playEmpty();
       } else {
         setError(err instanceof Error ? err.message : "Something went wrong");
@@ -129,6 +138,22 @@ function SearchApp() {
     if (result) handleSearch(result.query, result.lat, result.lon);
   }, [result, handleSearch]);
 
+  // Resolve each shop's open/closed status once results arrive. Done off the
+  // render path (and via a dynamically-imported parser) so it never blocks the
+  // list from showing.
+  useEffect(() => {
+    // openStates is already cleared in handleSearch before a new result lands, so
+    // here we only need to populate it (async, off the render path).
+    if (!result || result.shops.length === 0) return;
+    let cancelled = false;
+    computeOpenStates(result.shops).then((states) => {
+      if (!cancelled) setOpenStates(states);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [result]);
+
   const hasResults = result && result.shops.length > 0;
   const hasSearched = result !== null;
 
@@ -142,16 +167,24 @@ function SearchApp() {
     () => (result ? result.shops.filter(isStockist).length : 0),
     [result, isStockist]
   );
-  // What we actually render on the list + map (respects the brand-only filter).
+  const openCount = useMemo(
+    () => (result ? result.shops.filter((s) => openStates[s.id] === "open").length : 0),
+    [result, openStates]
+  );
+  // What we actually render on the list + map (respects brand-only + open-now).
   const shownShops = useMemo(() => {
     if (!result) return [];
-    return brandOnly ? result.shops.filter(isStockist) : result.shops;
-  }, [result, brandOnly, isStockist]);
+    let shops = result.shops;
+    if (brandOnly) shops = shops.filter(isStockist);
+    if (openNow) shops = shops.filter((s) => openStates[s.id] === "open");
+    return shops;
+  }, [result, brandOnly, openNow, openStates, isStockist]);
 
   async function shareSearch() {
     if (typeof window === "undefined" || !result) return;
     const url = `${window.location.origin}/search?q=${encodeURIComponent(result.query)}`;
     const data = { title: "Pinpoint", text: `Find "${result.query}" in shops near you`, url };
+    track("share", { q: result.query });
     try {
       if (navigator.share) await navigator.share(data);
       else {
@@ -356,21 +389,45 @@ function SearchApp() {
                     </button>
                   </div>
 
-                  {matchedBrands.length > 0 && stockistCount > 0 && (
-                    <button
-                      onClick={() => setBrandOnly((v) => !v)}
-                      aria-pressed={brandOnly}
-                      className={`w-full text-xs font-medium px-3 py-2 rounded-lg border transition-colors ${
-                        brandOnly
-                          ? "bg-[#141412] text-white border-[#141412]"
-                          : "bg-white text-[#57554E] border-[#E3E1DB] hover:border-[#141412]/30 hover:text-[#141412]"
-                      }`}
-                    >
-                      {brandOnly
-                        ? `Showing ${matchedBrands.join(", ")} stores only — show all`
-                        : `Show ${matchedBrands.join(", ")} stores only (${stockistCount})`}
-                    </button>
-                  )}
+                  {(matchedBrands.length > 0 && stockistCount > 0) || openCount > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {matchedBrands.length > 0 && stockistCount > 0 && (
+                        <button
+                          onClick={() => {
+                            setBrandOnly((v) => !v);
+                            track("filter_brand_only");
+                          }}
+                          aria-pressed={brandOnly}
+                          className={`flex-1 min-w-[140px] text-xs font-medium px-3 py-2 rounded-lg border transition-colors ${
+                            brandOnly
+                              ? "bg-[#141412] text-white border-[#141412]"
+                              : "bg-white text-[#57554E] border-[#E3E1DB] hover:border-[#141412]/30 hover:text-[#141412]"
+                          }`}
+                        >
+                          {brandOnly
+                            ? `${matchedBrands.join(", ")} only — show all`
+                            : `${matchedBrands.join(", ")} stores only (${stockistCount})`}
+                        </button>
+                      )}
+                      {openCount > 0 && (
+                        <button
+                          onClick={() => {
+                            setOpenNow((v) => !v);
+                            track("filter_open_now");
+                          }}
+                          aria-pressed={openNow}
+                          className={`flex-1 min-w-[120px] inline-flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border transition-colors ${
+                            openNow
+                              ? "bg-[#141412] text-white border-[#141412]"
+                              : "bg-white text-[#57554E] border-[#E3E1DB] hover:border-[#141412]/30 hover:text-[#141412]"
+                          }`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${openNow ? "bg-[#5BBE7E]" : "bg-[#3F8A5B]"}`} />
+                          {openNow ? "Showing open — show all" : `Open now (${openCount})`}
+                        </button>
+                      )}
+                    </div>
+                  ) : null}
 
                   {widenedNote && (
                     <p className="text-[11px] text-[#6B6A63] bg-white border border-[#E3E1DB] rounded-lg px-3 py-2">
@@ -383,6 +440,7 @@ function SearchApp() {
                       shop={shop}
                       index={i}
                       active={shop.id === activeShopId}
+                      openState={openStates[shop.id]}
                       onClick={() => setActiveShopId(shop.id === activeShopId ? null : shop.id)}
                     />
                   ))}
