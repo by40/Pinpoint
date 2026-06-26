@@ -196,23 +196,23 @@ function SearchApp() {
   }
 
   return (
-    <div className="flex flex-col min-h-[100dvh] md:h-screen bg-[#F7F6F3] text-[#141412] overflow-x-hidden md:overflow-hidden">
+    <div className="flex flex-col min-h-[100dvh] md:h-screen bg-bg text-ink overflow-x-hidden md:overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 px-5 py-3 border-b border-[#E3E1DB] flex items-center gap-3 bg-white sticky top-0 z-30 md:static">
+      <header className="shrink-0 px-5 py-3 border-b border-line flex items-center gap-3 bg-surface sticky top-0 z-30 md:static">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded bg-[#141412] flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded bg-accent flex items-center justify-center shrink-0">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
               <circle cx="12" cy="9" r="2.5" />
             </svg>
           </div>
-          <span className="font-semibold text-[#141412]">Pinpoint</span>
+          <span className="font-semibold text-ink">Pinpoint</span>
         </Link>
-        <span className="text-[#6B6A63] text-sm hidden sm:block">·</span>
-        <span className="text-[#57554E] text-sm hidden sm:block">Find clothes & brands near you</span>
+        <span className="text-faint text-sm hidden sm:block">·</span>
+        <span className="text-muted text-sm hidden sm:block">Find clothes & brands near you</span>
         <div className="ml-auto flex items-center gap-4">
           <SoundToggle />
-          <Link href="/wishlist" className="flex items-center gap-1.5 text-sm text-[#57554E] hover:text-[#141412] transition-colors">
+          <Link href="/wishlist" className="flex items-center gap-1.5 text-sm text-muted hover:text-accent transition-colors">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
               <rect x="9" y="3" width="6" height="4" rx="1" />
@@ -224,14 +224,14 @@ function SearchApp() {
 
       <div className="flex flex-1 flex-col md:flex-row md:overflow-hidden">
         {/* Left panel */}
-        <div className="w-full md:w-[400px] md:shrink-0 flex flex-col md:border-r border-[#E3E1DB] md:overflow-hidden bg-[#F2F1ED]">
-          <div className="p-4 border-b border-[#E3E1DB] bg-white space-y-3">
+        <div className="w-full md:w-[400px] md:shrink-0 flex flex-col md:border-r border-line md:overflow-hidden bg-panel">
+          <div className="p-4 border-b border-line bg-surface space-y-3">
             <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} loading={loading} />
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="radius" className="text-xs text-[#57554E]">Search radius</label>
-                <span className="text-xs font-semibold text-[#141412] tabular-nums">
+                <label htmlFor="radius" className="text-xs text-muted">Search radius</label>
+                <span className="text-xs font-semibold text-ink tabular-nums">
                   {radiusMiles} {radiusMiles === 1 ? "mile" : "miles"}
                 </span>
               </div>
@@ -246,22 +246,22 @@ function SearchApp() {
                 onMouseUp={reSearchWithRadius}
                 onTouchEnd={reSearchWithRadius}
                 aria-label="Search radius in miles"
-                className="w-full accent-[#141412] cursor-pointer"
+                className="w-full accent-accent cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-[#6B6A63] mt-0.5">
+              <div className="flex justify-between text-[10px] text-faint mt-0.5">
                 <span>1 mi</span>
                 <span>10 mi</span>
               </div>
             </div>
 
-            <p className="text-[11px] text-[#6B6A63] leading-snug flex items-start gap-1.5">
+            <p className="text-[11px] text-faint leading-snug flex items-start gap-1.5">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-px shrink-0" aria-hidden="true">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                 <circle cx="12" cy="9" r="2.5" />
               </svg>
               <span>
                 Your location is used only to find nearby shops — never stored.{" "}
-                <Link href="/privacy" className="underline underline-offset-2 hover:text-[#141412]">Privacy</Link>
+                <Link href="/privacy" className="underline underline-offset-2 hover:text-accent">Privacy</Link>
               </span>
             </p>
           </div>
@@ -275,15 +275,15 @@ function SearchApp() {
                   transition={{ duration: 0.35 }}
                   className="space-y-4"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-white border border-[#E3E1DB] flex items-center justify-center mx-auto">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6A63" strokeWidth="2">
+                  <div className="w-12 h-12 rounded-xl bg-surface border border-line flex items-center justify-center mx-auto">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a8794" strokeWidth="2">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                       <circle cx="12" cy="9" r="2.5" />
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-sm font-semibold text-[#141412] mb-1">Find clothes near you</h2>
-                    <p className="text-xs text-[#6B6A63] max-w-[200px] leading-relaxed">
+                    <h2 className="text-sm font-semibold text-ink mb-1">Find clothes near you</h2>
+                    <p className="text-xs text-faint max-w-[200px] leading-relaxed">
                       Search a brand or item above to find local shops likely to sell it.
                     </p>
                   </div>
@@ -292,7 +292,7 @@ function SearchApp() {
                       <button
                         key={s}
                         onClick={() => setQuery(s)}
-                        className="text-xs bg-white hover:bg-[#EAE8E3] border border-[#E3E1DB] text-[#57554E] hover:text-[#141412] px-3 py-1.5 rounded-full transition-colors"
+                        className="text-xs bg-surface hover:bg-panel border border-line text-muted hover:text-accent px-3 py-1.5 rounded-full transition-colors"
                       >
                         {s}
                       </button>
@@ -305,28 +305,28 @@ function SearchApp() {
             {loading && (
               <div className="space-y-2">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="rounded-xl p-4 bg-white border border-[#E3E1DB] animate-pulse">
+                  <div key={i} className="rounded-xl p-4 bg-surface border border-line animate-pulse">
                     <div className="flex justify-between mb-2">
-                      <div className="h-3.5 bg-[#E3E1DB] rounded w-2/3" />
-                      <div className="h-3.5 bg-[#E3E1DB] rounded w-12" />
+                      <div className="h-3.5 bg-line rounded w-2/3" />
+                      <div className="h-3.5 bg-line rounded w-12" />
                     </div>
-                    <div className="h-2.5 bg-[#E3E1DB] rounded w-4/5 mb-2" />
-                    <div className="h-2.5 bg-[#E3E1DB] rounded w-1/3" />
+                    <div className="h-2.5 bg-line rounded w-4/5 mb-2" />
+                    <div className="h-2.5 bg-line rounded w-1/3" />
                   </div>
                 ))}
               </div>
             )}
 
             {error && !loading && (
-              <div className="rounded-xl p-4 bg-white border border-[#E3E1DB] text-[#57554E] text-sm" role="alert">
+              <div className="rounded-xl p-4 bg-surface border border-line text-muted text-sm" role="alert">
                 {error}
               </div>
             )}
 
             {hasSearched && !loading && !error && !hasResults && rejected && (
               <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2" role="status" aria-live="polite">
-                <p className="text-sm font-medium text-[#141412] mb-1">Pinpoint is for clothes &amp; fashion</p>
-                <p className="text-xs text-[#6B6A63] leading-relaxed max-w-[260px] mb-4">
+                <p className="text-sm font-medium text-ink mb-1">Pinpoint is for clothes &amp; fashion</p>
+                <p className="text-xs text-faint leading-relaxed max-w-[260px] mb-4">
                   &ldquo;{result.query}&rdquo; doesn&apos;t look like clothing. Try a brand or a garment instead —
                   like one of these:
                 </p>
@@ -335,7 +335,7 @@ function SearchApp() {
                     <button
                       key={s}
                       onClick={() => setQuery(s)}
-                      className="text-xs bg-white hover:bg-[#EAE8E3] border border-[#E3E1DB] text-[#57554E] hover:text-[#141412] px-3 py-1.5 rounded-full transition-colors"
+                      className="text-xs bg-surface hover:bg-panel border border-line text-muted hover:text-accent px-3 py-1.5 rounded-full transition-colors"
                     >
                       {s}
                     </button>
@@ -346,10 +346,10 @@ function SearchApp() {
 
             {hasSearched && !loading && !error && !hasResults && !rejected && (
               <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2" role="status" aria-live="polite">
-                <p className="text-sm font-medium text-[#141412] mb-1">
+                <p className="text-sm font-medium text-ink mb-1">
                   {timedOut ? "No shops near you" : `No shops found for “${result.query}”`}
                 </p>
-                <p className="text-xs text-[#6B6A63] leading-relaxed max-w-[260px]">
+                <p className="text-xs text-faint leading-relaxed max-w-[260px]">
                   {timedOut
                     ? "We couldn’t find anything nearby in time. Please try again, widen your search radius, or try a nearby town."
                     : `We looked within ${radiusMiles} ${radiusMiles === 1 ? "mile" : "miles"}. Clothing listings come from community OpenStreetMap data, which can be thin in some areas — try a brand name, a broader item, a larger radius, or a nearby town.`}
@@ -368,18 +368,18 @@ function SearchApp() {
                   className="space-y-2"
                 >
                   <div className="flex items-center justify-between gap-2 pb-1">
-                    <p className="text-xs text-[#6B6A63]" role="status" aria-live="polite" aria-atomic="true">
-                      <span className="text-[#141412] font-semibold">{shownShops.length}</span>{" "}
+                    <p className="text-xs text-faint" role="status" aria-live="polite" aria-atomic="true">
+                      <span className="text-ink font-semibold">{shownShops.length}</span>{" "}
                       {brandOnly ? "confirmed stockists" : "shops that may stock this"}
                       {!brandOnly && matchedBrands.length > 0 ? (
-                        <span> · <span className="text-[#141412]">{matchedBrands.slice(0, 3).join(", ")}</span></span>
+                        <span> · <span className="text-ink">{matchedBrands.slice(0, 3).join(", ")}</span></span>
                       ) : !brandOnly && matchedTags.length > 0 ? (
                         <span> · {matchedTags.slice(0, 3).join(", ")}</span>
                       ) : null}
                     </p>
                     <button
                       onClick={shareSearch}
-                      className="shrink-0 text-xs text-[#57554E] hover:text-[#141412] flex items-center gap-1 transition-colors"
+                      className="shrink-0 text-xs text-muted hover:text-accent flex items-center gap-1 transition-colors"
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                         <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
@@ -400,8 +400,8 @@ function SearchApp() {
                           aria-pressed={brandOnly}
                           className={`flex-1 min-w-[140px] text-xs font-medium px-3 py-2 rounded-lg border transition-colors ${
                             brandOnly
-                              ? "bg-[#141412] text-white border-[#141412]"
-                              : "bg-white text-[#57554E] border-[#E3E1DB] hover:border-[#141412]/30 hover:text-[#141412]"
+                              ? "bg-accent text-white border-accent"
+                              : "bg-surface text-muted border-line hover:border-accent/30 hover:text-accent"
                           }`}
                         >
                           {brandOnly
@@ -418,11 +418,11 @@ function SearchApp() {
                           aria-pressed={openNow}
                           className={`flex-1 min-w-[120px] inline-flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border transition-colors ${
                             openNow
-                              ? "bg-[#141412] text-white border-[#141412]"
-                              : "bg-white text-[#57554E] border-[#E3E1DB] hover:border-[#141412]/30 hover:text-[#141412]"
+                              ? "bg-accent text-white border-accent"
+                              : "bg-surface text-muted border-line hover:border-accent/30 hover:text-accent"
                           }`}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${openNow ? "bg-[#5BBE7E]" : "bg-[#3F8A5B]"}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${openNow ? "bg-white" : "bg-success"}`} />
                           {openNow ? "Showing open — show all" : `Open now (${openCount})`}
                         </button>
                       )}
@@ -430,7 +430,7 @@ function SearchApp() {
                   ) : null}
 
                   {widenedNote && (
-                    <p className="text-[11px] text-[#6B6A63] bg-white border border-[#E3E1DB] rounded-lg px-3 py-2">
+                    <p className="text-[11px] text-faint bg-surface border border-line rounded-lg px-3 py-2">
                       {widenedNote}
                     </p>
                   )}
@@ -451,10 +451,10 @@ function SearchApp() {
         </div>
 
         {/* Map panel */}
-        <div className="relative h-[60vh] md:h-auto md:flex-1 md:min-h-0 bg-[#EAE8E3] border-t md:border-t-0 border-[#E3E1DB]">
+        <div className="relative h-[60vh] md:h-auto md:flex-1 md:min-h-0 bg-panel border-t md:border-t-0 border-line">
           {!hasSearched && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <p className="text-[#6B6A63] text-sm">Search to see the map</p>
+              <p className="text-faint text-sm">Search to see the map</p>
             </div>
           )}
           {hasSearched && (

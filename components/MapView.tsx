@@ -18,7 +18,7 @@ const SHOP_LAYER = "shop-pins";
 function userPinEl(): HTMLDivElement {
   const el = document.createElement("div");
   el.style.cssText =
-    "width:14px;height:14px;background:#141412;border:3px solid #ffffff;border-radius:50%;box-shadow:0 0 0 4px rgba(20,20,18,0.15)";
+    "width:14px;height:14px;background:#6b2bf2;border:3px solid #ffffff;border-radius:50%;box-shadow:0 0 0 4px rgba(107,43,242,0.28)";
   return el;
 }
 
@@ -33,7 +33,7 @@ function escapeHtml(s: string): string {
 function popupHTML(shop: Shop): string {
   const dist = `${formatDistance(shop.distanceKm)} away`;
   const dir = `https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lon}`;
-  return `<div style="font-family:monospace;min-width:150px"><strong style="font-size:13px;color:#141412">${escapeHtml(shop.name)}</strong><br><span style="color:#6B6A63;font-size:11px">${escapeHtml(shop.address)}</span><br><span style="color:#57554E;font-size:11px;font-weight:600">${dist}</span><br><a href="${dir}" target="_blank" rel="noopener noreferrer" style="color:#141412;font-size:11px;font-weight:600;text-decoration:underline">Directions →</a></div>`;
+  return `<div style="font-family:system-ui,-apple-system,sans-serif;min-width:150px"><strong style="font-size:13px;color:#15131c">${escapeHtml(shop.name)}</strong><br><span style="color:#8a8794;font-size:11px">${escapeHtml(shop.address)}</span><br><span style="color:#5c5968;font-size:11px;font-weight:600">${dist}</span><br><a href="${dir}" target="_blank" rel="noopener noreferrer" style="color:#6b2bf2;font-size:11px;font-weight:600;text-decoration:underline">Directions →</a></div>`;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -111,7 +111,7 @@ export default function MapView({ userLat, userLon, shops, activeShopId, onShopC
             type: "fill-extrusion",
             minzoom: 13,
             paint: {
-              "fill-extrusion-color": "#F2F1ED",
+              "fill-extrusion-color": "#f4f3f8",
               "fill-extrusion-height": ["coalesce", ["get", "render_height"], ["get", "height"], 6],
               "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], ["get", "min_height"], 0],
               "fill-extrusion-opacity": 0.9,
@@ -135,9 +135,9 @@ export default function MapView({ userLat, userLon, shops, activeShopId, onShopC
           source: SHOP_SOURCE,
           paint: {
             "circle-radius": ["case", active, 8, 5],
-            "circle-color": ["case", active, "#141412", "#57554E"],
+            "circle-color": ["case", active, "#6b2bf2", "#a78bfa"],
             "circle-stroke-width": ["case", active, 3, 2],
-            "circle-stroke-color": ["case", active, "#ffffff", "#EAE8E3"],
+            "circle-stroke-color": ["case", active, "#ffffff", "#ede9fe"],
           },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);

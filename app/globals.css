@@ -1,18 +1,45 @@
 @import "tailwindcss";
 
-@theme inline {
+/* ── Design tokens ───────────────────────────────────────────────────────────
+   "Bold Retail Pop" — clean white canvas, high contrast, a vivid violet accent.
+   Semantic names so a future re-skin is a one-file change. Tailwind v4 turns
+   each --color-* / --font-* into utilities (bg-bg, text-ink, bg-accent, font-display…). */
+@theme {
+  --color-bg: #ffffff;          /* page background */
+  --color-panel: #f4f3f8;       /* subtle panels, list rails, hover fills */
+  --color-surface: #ffffff;     /* cards */
+  --color-ink: #15131c;         /* primary text */
+  --color-muted: #5c5968;       /* secondary text */
+  --color-faint: #8a8794;       /* tertiary text, placeholders, disabled */
+  --color-line: #e7e5ef;        /* borders / dividers */
+
+  --color-accent: #6b2bf2;      /* vivid violet — CTAs, brand, active */
+  --color-accent-hover: #571fd0;
+  --color-accent-soft: #f1eafe; /* chip / highlight tint */
+  --color-on-accent: #ffffff;   /* text/icons on accent */
+
+  --color-success: #16a34a;     /* "open now" */
+  --color-danger: #dc2626;      /* errors */
+
+  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-jakarta);
   --font-mono: var(--font-ibm);
 }
 
 body {
-  background: #F7F6F3;
-  color: #141412;
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+/* Headings lead with the display face by default; components can override. */
+h1, h2, h3 {
+  font-family: var(--font-display);
 }
 
 /* Visible keyboard focus for all interactive elements */
 @layer base {
   :focus-visible {
-    outline: 2px solid #141412;
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
     border-radius: 4px;
   }

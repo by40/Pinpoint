@@ -12,8 +12,8 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const DARK = "#141412";
-const PIN = "#F7F6F3";
+const DARK = "#6b2bf2"; // brand violet — the icon badge fill
+const PIN = "#ffffff";
 
 // The pin path from public/icon.svg, drawn on a 24x24 viewBox.
 const pinPath =

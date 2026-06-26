@@ -44,13 +44,13 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F6F3] text-[#141412]">
+    <div className="min-h-screen bg-bg text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <PageHeader />
 
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1] mb-4">About Pinpoint</h1>
-        <p className="text-[1.0625rem] text-[#57554E] leading-relaxed mb-10 max-w-xl">
+        <p className="text-[1.0625rem] text-muted leading-relaxed mb-10 max-w-xl">
           Pinpoint helps you find the clothes and brands you want in shops near you — a fast, private way to shop local
           instead of defaulting to online.
         </p>
@@ -64,21 +64,21 @@ export default function AboutPage() {
               ["See nearby shops on a map", "Results are mapped in 3D and sorted by distance, with brand stores first."],
             ].map(([t, d], i) => (
               <li key={t} className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-[#141412] text-white text-xs font-semibold flex items-center justify-center">{i + 1}</span>
+                <span className="shrink-0 w-6 h-6 rounded-full bg-accent text-white text-xs font-semibold flex items-center justify-center">{i + 1}</span>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#141412]">{t}</h3>
-                  <p className="text-sm text-[#57554E] leading-relaxed">{d}</p>
+                  <h3 className="text-sm font-semibold text-ink">{t}</h3>
+                  <p className="text-sm text-muted leading-relaxed">{d}</p>
                 </div>
               </li>
             ))}
           </ol>
         </section>
 
-        <section className="mb-10 p-5 rounded-2xl border border-[#E3E1DB] bg-white">
+        <section className="mb-10 p-5 rounded-2xl border border-line bg-surface">
           <h2 className="text-base font-bold tracking-tight mb-2">An honest note on accuracy</h2>
-          <p className="text-sm text-[#57554E] leading-relaxed">
+          <p className="text-sm text-muted leading-relaxed">
             Pinpoint uses community OpenStreetMap data, which has no live inventory. So results are shops{" "}
-            <strong className="text-[#141412] font-semibold">likely</strong> to sell what you searched — not a guarantee
+            <strong className="text-ink font-semibold">likely</strong> to sell what you searched — not a guarantee
             it&apos;s in stock. Listings can be incomplete or out of date; always confirm with the shop.
           </p>
         </section>
@@ -88,8 +88,8 @@ export default function AboutPage() {
           <div className="space-y-5">
             {FAQS.map((f) => (
               <div key={f.q}>
-                <h3 className="text-sm font-semibold text-[#141412] mb-1">{f.q}</h3>
-                <p className="text-sm text-[#57554E] leading-relaxed">{f.a}</p>
+                <h3 className="text-sm font-semibold text-ink mb-1">{f.q}</h3>
+                <p className="text-sm text-muted leading-relaxed">{f.a}</p>
               </div>
             ))}
           </div>
@@ -97,7 +97,7 @@ export default function AboutPage() {
 
         <Link
           href="/search"
-          className="inline-flex items-center gap-2 bg-[#141412] hover:bg-[#2A2A28] text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors"
+          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors"
         >
           Start searching →
         </Link>

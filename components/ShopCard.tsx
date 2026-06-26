@@ -36,56 +36,56 @@ export default function ShopCard({ shop, index, active, openState, onClick }: Pr
           onClick();
         }
       }}
-      className={`cursor-pointer rounded-xl p-3.5 border transition-colors ${
+      className={`cursor-pointer rounded-xl p-3.5 border transition-colors bg-surface ${
         active
-          ? "border-[#141412]/35 bg-white"
-          : "border-[#E3E1DB] bg-white hover:border-[#141412]/20"
+          ? "border-accent ring-1 ring-accent/30"
+          : "border-line hover:border-accent/40"
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-[#141412] font-semibold text-sm leading-tight">{shop.name}</h3>
+        <h3 className="text-ink font-bold text-sm leading-tight">{shop.name}</h3>
         <div className="flex items-center gap-1 shrink-0">
           {shop.brand && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#141412] text-white">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent text-on-accent">
               {shop.brand}
             </span>
           )}
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F2F1ED] text-[#57554E] border border-[#E3E1DB]">
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-panel text-muted border border-line">
             {typeLabel(shop.shopType)}
           </span>
         </div>
       </div>
 
-      <p className="mt-1 text-[#6B6A63] text-xs leading-snug">{shop.address}</p>
+      <p className="mt-1 text-faint text-xs leading-snug">{shop.address}</p>
 
       <div className="mt-2.5 flex items-center gap-3 flex-wrap">
-        <span className="flex items-center gap-1 text-[#141412] text-xs">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <span className="flex items-center gap-1 text-ink text-xs font-medium">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
           </svg>
           {formatDistance(shop.distanceKm)}
         </span>
 
         <span title="Estimated price range" className="flex items-center gap-0.5">
-          <span className="text-[#6B6A63] text-[10px]">est.</span>
-          <span className={`text-xs font-medium tabular-nums ${
-            shop.priceRange === 1 ? "text-[#141412]" : shop.priceRange === 2 ? "text-[#57554E]" : "text-[#6B6A63]"
+          <span className="text-faint text-[10px]">est.</span>
+          <span className={`text-xs font-semibold tabular-nums ${
+            shop.priceRange === 1 ? "text-ink" : shop.priceRange === 2 ? "text-muted" : "text-faint"
           }`}>
             {"£".repeat(shop.priceRange)}
           </span>
         </span>
 
         {(openState === "open" || openState === "closed") && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium">
-            <span className={`w-1.5 h-1.5 rounded-full ${openState === "open" ? "bg-[#3F8A5B]" : "bg-[#B9B6AD]"}`} />
-            <span className={openState === "open" ? "text-[#3F8A5B]" : "text-[#9B988F]"}>
+          <span className="inline-flex items-center gap-1 text-xs font-semibold">
+            <span className={`w-1.5 h-1.5 rounded-full ${openState === "open" ? "bg-success" : "bg-faint"}`} />
+            <span className={openState === "open" ? "text-success" : "text-faint"}>
               {openState === "open" ? "Open" : "Closed"}
             </span>
           </span>
         )}
 
         {shop.openingHours && (
-          <span className="text-[#6B6A63] text-xs truncate max-w-[140px]" title={shop.openingHours}>
+          <span className="text-faint text-xs truncate max-w-[140px]" title={shop.openingHours}>
             {shop.openingHours}
           </span>
         )}
@@ -98,7 +98,7 @@ export default function ShopCard({ shop, index, active, openState, onClick }: Pr
             e.stopPropagation();
             track("directions");
           }}
-          className="text-xs text-[#57554E] hover:text-[#141412] hover:underline transition-colors"
+          className="text-xs font-medium text-accent hover:text-accent-hover hover:underline transition-colors"
         >
           Directions
         </a>
@@ -109,7 +109,7 @@ export default function ShopCard({ shop, index, active, openState, onClick }: Pr
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="text-xs text-[#57554E] hover:text-[#141412] hover:underline transition-colors"
+            className="text-xs font-medium text-muted hover:text-accent hover:underline transition-colors"
           >
             Website
           </a>
@@ -118,7 +118,7 @@ export default function ShopCard({ shop, index, active, openState, onClick }: Pr
           <a
             href={`tel:${shop.phone}`}
             onClick={(e) => e.stopPropagation()}
-            className="text-xs text-[#6B6A63] hover:text-[#141412] transition-colors"
+            className="text-xs text-faint hover:text-accent transition-colors"
           >
             {shop.phone}
           </a>

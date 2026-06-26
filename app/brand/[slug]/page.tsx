@@ -67,25 +67,25 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F6F3] text-[#141412]">
+    <div className="min-h-screen bg-bg text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <PageHeader />
 
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <nav className="text-xs text-[#6B6A63] mb-6">
-          <Link href="/" className="hover:text-[#141412]">Home</Link> ·{" "}
-          <Link href="/directory" className="hover:text-[#141412]">Brands</Link> ·{" "}
-          <span className="text-[#57554E]">{brand.name}</span>
+        <nav className="text-xs text-faint mb-6">
+          <Link href="/" className="hover:text-accent">Home</Link> ·{" "}
+          <Link href="/directory" className="hover:text-accent">Brands</Link> ·{" "}
+          <span className="text-muted">{brand.name}</span>
         </nav>
 
         <h1 className="text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1] mb-4">
           Where to buy {brand.name} near you
         </h1>
-        <p className="text-[1.0625rem] text-[#57554E] leading-relaxed mb-6 max-w-xl">{brand.blurb}</p>
+        <p className="text-[1.0625rem] text-muted leading-relaxed mb-6 max-w-xl">{brand.blurb}</p>
 
         <Link
           href={searchHref}
-          className="inline-flex items-center gap-2 bg-[#141412] hover:bg-[#2A2A28] text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors"
+          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors"
         >
           Find {brand.name} near you →
         </Link>
@@ -97,7 +97,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
               <Link
                 key={ex}
                 href={`/search?q=${encodeURIComponent(ex)}`}
-                className="text-sm text-[#57554E] hover:text-[#141412] bg-white hover:bg-[#EAE8E3] border border-[#E3E1DB] px-3 py-1.5 rounded-full transition-colors"
+                className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors"
               >
                 {ex}
               </Link>
@@ -107,10 +107,10 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
 
         <section className="mt-10">
           <h2 className="text-base font-bold tracking-tight mb-2">How Pinpoint finds {brand.name}</h2>
-          <p className="text-sm text-[#57554E] leading-relaxed max-w-xl">
+          <p className="text-sm text-muted leading-relaxed max-w-xl">
             When you search for {brand.name}, Pinpoint looks for nearby {brand.name} stores plus the shops that typically
             carry {brand.sells}, using community-maintained OpenStreetMap data. Results are mapped in 3D and sorted by
-            distance, with confirmed {brand.name} stockists shown first. It shows shops <strong className="text-[#141412] font-semibold">likely</strong> to
+            distance, with confirmed {brand.name} stockists shown first. It shows shops <strong className="text-ink font-semibold">likely</strong> to
             sell {brand.name} — not live stock — so it&apos;s always worth a quick call ahead.
           </p>
         </section>
@@ -120,21 +120,21 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
           <div className="space-y-5">
             {faqs.map((f) => (
               <div key={f.q}>
-                <h3 className="text-sm font-semibold text-[#141412] mb-1">{f.q}</h3>
-                <p className="text-sm text-[#57554E] leading-relaxed">{f.a}</p>
+                <h3 className="text-sm font-semibold text-ink mb-1">{f.q}</h3>
+                <p className="text-sm text-muted leading-relaxed">{f.a}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mt-12 pt-8 border-t border-[#E3E1DB]">
-          <h2 className="text-[10px] uppercase tracking-widest text-[#6B6A63] font-medium mb-3">Other brands</h2>
+        <section className="mt-12 pt-8 border-t border-line">
+          <h2 className="text-[10px] uppercase tracking-widest text-faint font-medium mb-3">Other brands</h2>
           <div className="flex flex-wrap gap-2">
             {related.map((b) => (
               <Link
                 key={b.slug}
                 href={`/brand/${b.slug}`}
-                className="text-sm text-[#57554E] hover:text-[#141412] bg-white hover:bg-[#EAE8E3] border border-[#E3E1DB] px-3 py-1.5 rounded-full transition-colors"
+                className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors"
               >
                 {b.name}
               </Link>

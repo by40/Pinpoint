@@ -74,7 +74,7 @@ export default function SearchBar({ onSearch, loading, value: controlledValue, o
     <div className="w-full">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6A63] pointer-events-none">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-faint pointer-events-none">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" strokeLinecap="round" />
@@ -86,14 +86,14 @@ export default function SearchBar({ onSearch, loading, value: controlledValue, o
             onChange={(e) => setQuery(e.target.value)}
             maxLength={80}
             placeholder="Search a brand or item… e.g. Nike trainers"
-            className="w-full bg-white border border-[#E3E1DB] text-[#141412] placeholder-[#6B6A63] rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#141412]/40 focus:ring-1 focus:ring-[#141412]/10 transition-colors"
+            className="w-full bg-surface border border-line text-ink placeholder-faint rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/25 transition-colors"
           />
         </div>
         <motion.button
           type="submit"
           disabled={busy || !query.trim()}
           whileTap={{ scale: 0.97 }}
-          className="bg-[#141412] hover:bg-[#2A2A28] disabled:opacity-30 disabled:cursor-not-allowed text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2 whitespace-nowrap"
+          className="bg-accent hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2 whitespace-nowrap"
         >
           {busy ? (
             <>
@@ -118,13 +118,13 @@ export default function SearchBar({ onSearch, loading, value: controlledValue, o
             maxLength={80}
             placeholder="Town or postcode… e.g. Brighton or BN1 1AA"
             aria-label="Town or postcode"
-            className="flex-1 bg-white border border-[#E3E1DB] text-[#141412] placeholder-[#6B6A63] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#141412]/40 focus:ring-1 focus:ring-[#141412]/10 transition-colors"
+            className="flex-1 bg-surface border border-line text-ink placeholder-faint rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/25 transition-colors"
           />
           <motion.button
             type="submit"
             disabled={geocoding || !place.trim()}
             whileTap={{ scale: 0.97 }}
-            className="bg-[#141412] hover:bg-[#2A2A28] disabled:opacity-30 disabled:cursor-not-allowed text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="bg-accent hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2 whitespace-nowrap"
           >
             {geocoding ? "Finding…" : "Use this"}
           </motion.button>
@@ -132,7 +132,7 @@ export default function SearchBar({ onSearch, loading, value: controlledValue, o
       )}
 
       {error && (
-        <p className="mt-2 text-[#57554E] text-xs" role="alert">{error}</p>
+        <p className="mt-2 text-muted text-xs" role="alert">{error}</p>
       )}
     </div>
   );

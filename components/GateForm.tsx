@@ -50,19 +50,19 @@ export default function GateForm() {
         }}
         placeholder="Enter password"
         aria-invalid={error}
-        className="w-full rounded-xl border border-[#E3E1DB] bg-white px-4 py-3 text-sm text-[#141412] placeholder:text-[#9B988F] outline-none focus:border-[#141412] transition-colors"
+        className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink placeholder:text-faint outline-none focus:border-accent transition-colors"
       />
       <button
         type="submit"
         disabled={loading || !password}
-        className="w-full rounded-xl bg-[#141412] hover:bg-[#2A2A28] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-3 transition-colors"
+        className="w-full rounded-xl bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-3 transition-colors"
       >
         {loading ? "Checking…" : "Enter"}
       </button>
       <p
         aria-live="polite"
         className={`text-xs text-center min-h-4 transition-opacity ${
-          error ? "text-[#B4423A] opacity-100" : "opacity-0"
+          error ? "text-danger opacity-100" : "opacity-0"
         }`}
       >
         Incorrect password — try again.

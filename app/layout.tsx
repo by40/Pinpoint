@@ -1,13 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
+// Display face for headings — Space Grotesk has character without being loud.
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
+
+// Body face — Plus Jakarta Sans: clean, modern, friendlier than the default Inter.
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+// Mono retained only as a small numeric/stat accent.
 const ibmMono = IBM_Plex_Mono({
   variable: "--font-ibm",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pinpointapp.uk";
@@ -55,7 +70,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F7F6F3",
+  themeColor: "#6b2bf2",
   colorScheme: "light",
 };
 
@@ -96,7 +111,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-GB" className={`${ibmMono.variable} antialiased`}>
+    <html lang="en-GB" className={`${spaceGrotesk.variable} ${jakarta.variable} ${ibmMono.variable} antialiased`}>
       <head>
         {/* Without JS, Framer Motion's entry animations never run, leaving
             elements stuck at their initial opacity:0. Force them visible so
@@ -105,7 +120,7 @@ export default function RootLayout({
           <style>{`[style*="opacity:0"],[style*="opacity: 0"]{opacity:1!important;transform:none!important}`}</style>
         </noscript>
       </head>
-      <body className="font-mono">
+      <body className="font-sans">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

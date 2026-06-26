@@ -25,7 +25,7 @@ export default function SoundToggle() {
       onClick={toggle}
       aria-label={muted ? "Enable sound effects" : "Mute sound effects"}
       title={muted ? "Sound off" : "Sound on"}
-      className="flex items-center text-[#57554E] hover:text-[#141412] transition-colors"
+      className="flex items-center text-muted hover:text-accent transition-colors"
     >
       {muted ? (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

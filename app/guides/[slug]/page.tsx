@@ -60,41 +60,41 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F6F3] text-[#141412]">
+    <div className="min-h-screen bg-bg text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <PageHeader />
 
       <main className="max-w-2xl mx-auto px-6 py-12">
-        <nav className="text-xs text-[#6B6A63] mb-6">
-          <Link href="/" className="hover:text-[#141412]">Home</Link> ·{" "}
-          <Link href="/guides" className="hover:text-[#141412]">Guides</Link>
+        <nav className="text-xs text-faint mb-6">
+          <Link href="/" className="hover:text-accent">Home</Link> ·{" "}
+          <Link href="/guides" className="hover:text-accent">Guides</Link>
         </nav>
 
         <h1 className="text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1] mb-3">{guide.title}</h1>
-        <p className="text-xs text-[#6B6A63] mb-8">Updated 25 June 2026</p>
+        <p className="text-xs text-faint mb-8">Updated 25 June 2026</p>
 
-        <p className="text-[1.0625rem] text-[#57554E] leading-relaxed mb-8">{guide.intro}</p>
+        <p className="text-[1.0625rem] text-muted leading-relaxed mb-8">{guide.intro}</p>
 
         {guide.sections.map((s) => (
           <section key={s.heading} className="mb-8">
-            <h2 className="text-lg font-bold tracking-tight text-[#141412] mb-2">{s.heading}</h2>
+            <h2 className="text-lg font-bold tracking-tight text-ink mb-2">{s.heading}</h2>
             <div className="space-y-3">
               {s.paras.map((p, i) => (
-                <p key={i} className="text-sm text-[#57554E] leading-relaxed">{p}</p>
+                <p key={i} className="text-sm text-muted leading-relaxed">{p}</p>
               ))}
             </div>
           </section>
         ))}
 
         {/* Try these searches */}
-        <section className="mb-8 p-5 rounded-2xl border border-[#E3E1DB] bg-white">
+        <section className="mb-8 p-5 rounded-2xl border border-line bg-surface">
           <h2 className="text-sm font-bold tracking-tight mb-3">Try these searches</h2>
           <div className="flex flex-wrap gap-2">
             {guide.searches.map((q) => (
               <Link
                 key={q}
                 href={`/search?q=${encodeURIComponent(q)}`}
-                className="text-sm text-[#57554E] hover:text-[#141412] bg-[#F7F6F3] hover:bg-[#EAE8E3] border border-[#E3E1DB] px-3 py-1.5 rounded-full transition-colors"
+                className="text-sm text-muted hover:text-accent bg-bg hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors"
               >
                 {q}
               </Link>
@@ -102,7 +102,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           </div>
           <Link
             href="/search"
-            className="inline-flex items-center gap-2 mt-4 bg-[#141412] hover:bg-[#2A2A28] text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
+            className="inline-flex items-center gap-2 mt-4 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
           >
             Open the live map →
           </Link>
@@ -113,20 +113,20 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           <section className="mb-8">
             {brands.length > 0 && (
               <div className="mb-4">
-                <h2 className="text-[10px] uppercase tracking-widest text-[#6B6A63] font-medium mb-2">Related brands</h2>
+                <h2 className="text-[10px] uppercase tracking-widest text-faint font-medium mb-2">Related brands</h2>
                 <div className="flex flex-wrap gap-2">
                   {brands.map((b) => (
-                    <Link key={b.slug} href={`/brand/${b.slug}`} className="text-sm text-[#57554E] hover:text-[#141412] bg-white hover:bg-[#EAE8E3] border border-[#E3E1DB] px-3 py-1.5 rounded-full transition-colors">{b.name}</Link>
+                    <Link key={b.slug} href={`/brand/${b.slug}`} className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">{b.name}</Link>
                   ))}
                 </div>
               </div>
             )}
             {cities.length > 0 && (
               <div>
-                <h2 className="text-[10px] uppercase tracking-widest text-[#6B6A63] font-medium mb-2">Browse by city</h2>
+                <h2 className="text-[10px] uppercase tracking-widest text-faint font-medium mb-2">Browse by city</h2>
                 <div className="flex flex-wrap gap-2">
                   {cities.map((c) => (
-                    <Link key={c.slug} href={`/clothes-shops/${c.slug}`} className="text-sm text-[#57554E] hover:text-[#141412] bg-white hover:bg-[#EAE8E3] border border-[#E3E1DB] px-3 py-1.5 rounded-full transition-colors">{c.name}</Link>
+                    <Link key={c.slug} href={`/clothes-shops/${c.slug}`} className="text-sm text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">{c.name}</Link>
                   ))}
                 </div>
               </div>
@@ -135,12 +135,12 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
         )}
 
         {/* More guides */}
-        <section className="pt-8 border-t border-[#E3E1DB]">
-          <h2 className="text-[10px] uppercase tracking-widest text-[#6B6A63] font-medium mb-3">More guides</h2>
+        <section className="pt-8 border-t border-line">
+          <h2 className="text-[10px] uppercase tracking-widest text-faint font-medium mb-3">More guides</h2>
           <ul className="space-y-2">
             {others.map((g) => (
               <li key={g.slug}>
-                <Link href={`/guides/${g.slug}`} className="text-sm font-medium text-[#141412] hover:text-[#57554E] underline underline-offset-2 transition-colors">{g.title}</Link>
+                <Link href={`/guides/${g.slug}`} className="text-sm font-medium text-ink hover:text-muted underline underline-offset-2 transition-colors">{g.title}</Link>
               </li>
             ))}
           </ul>
