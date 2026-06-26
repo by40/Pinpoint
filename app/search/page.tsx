@@ -46,9 +46,9 @@ function SearchApp() {
   };
 
   // Hard cap on how long a single search may run before we give up and show
-  // "0 results" rather than leaving the user staring at a spinner. Covers the
-  // whole flow (initial fetch + the optional auto-widen retry).
-  const SEARCH_TIMEOUT_MS = 30_000;
+  // "no shops near you" rather than leaving the user staring at a spinner.
+  // Covers the whole flow (initial fetch + the optional auto-widen retry).
+  const SEARCH_TIMEOUT_MS = 20_000;
 
   const fetchShops = async (q: string, lat: number, lon: number, miles: number, signal?: AbortSignal) => {
     const radiusM = Math.round(miles * 1609.34);
@@ -314,11 +314,11 @@ function SearchApp() {
             {hasSearched && !loading && !error && !hasResults && !rejected && (
               <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2" role="status" aria-live="polite">
                 <p className="text-sm font-medium text-[#141412] mb-1">
-                  {timedOut ? "0 results found" : `No shops found for “${result.query}”`}
+                  {timedOut ? "No shops near you" : `No shops found for “${result.query}”`}
                 </p>
                 <p className="text-xs text-[#6B6A63] leading-relaxed max-w-[260px]">
                   {timedOut
-                    ? "The search took too long to respond (over 30 seconds), so we stopped it. This usually means the map data service is busy — please try again in a moment."
+                    ? "We couldn’t find anything nearby in time. Please try again, widen your search radius, or try a nearby town."
                     : `We looked within ${radiusMiles} ${radiusMiles === 1 ? "mile" : "miles"}. Clothing listings come from community OpenStreetMap data, which can be thin in some areas — try a brand name, a broader item, a larger radius, or a nearby town.`}
                 </p>
               </div>
