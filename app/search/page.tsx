@@ -34,6 +34,7 @@ function SearchApp() {
   const [matchedBrands, setMatchedBrands] = useState<string[]>([]);
   const [brandOnly, setBrandOnly] = useState(false);
   const [rejected, setRejected] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   const [shareLabel, setShareLabel] = useState("Share");
   const [widenedNote, setWidenedNote] = useState<string | null>(null);
   const [radiusMiles, setRadiusMiles] = useState(2);
@@ -44,10 +45,16 @@ function SearchApp() {
     setRadiusMiles(m);
   };
 
-  const fetchShops = async (q: string, lat: number, lon: number, miles: number) => {
+  // Hard cap on how long a single search may run before we give up and show
+  // "0 results" rather than leaving the user staring at a spinner. Covers the
+  // whole flow (initial fetch + the optional auto-widen retry).
+  const SEARCH_TIMEOUT_MS = 30_000;
+
+  const fetchShops = async (q: string, lat: number, lon: number, miles: number, signal?: AbortSignal) => {
     const radiusM = Math.round(miles * 1609.34);
     const res = await fetch(
-      `/api/shops?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&radius=${radiusM}`
+      `/api/shops?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&radius=${radiusM}`,
+      { signal }
     );
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? "Failed to fetch shops");
@@ -60,20 +67,25 @@ function SearchApp() {
     setActiveShopId(null);
     setWidenedNote(null);
     setRejected(false);
+    setTimedOut(false);
     sounds.playStart();
     sounds.startLoadingLoop();
 
     const baseMiles = radiusMilesRef.current;
 
+    // Abort the in-flight request(s) once the 30s budget is spent.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), SEARCH_TIMEOUT_MS);
+
     try {
-      let data = await fetchShops(searchQuery, lat, lon, baseMiles);
+      let data = await fetchShops(searchQuery, lat, lon, baseMiles, controller.signal);
 
       // Auto-broaden once if nothing turned up and we're not already at the cap —
       // thin OpenStreetMap coverage shouldn't read as "no shops exist". Skip for
       // rejected (non-clothing) queries — widening won't help those.
       if (!data.rejected && (data.shops?.length ?? 0) === 0 && baseMiles < 10) {
         const widerMiles = Math.min(baseMiles * 2, 10);
-        const wider = await fetchShops(searchQuery, lat, lon, widerMiles);
+        const wider = await fetchShops(searchQuery, lat, lon, widerMiles, controller.signal);
         if ((wider.shops?.length ?? 0) > 0) {
           data = wider;
           setWidenedNote(`Nothing within ${baseMiles} mi — widened to ${widerMiles} mi.`);
@@ -90,9 +102,22 @@ function SearchApp() {
       if ((data.shops?.length ?? 0) > 0) sounds.playSuccess();
       else sounds.playEmpty();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-      sounds.playError();
+      // 30s budget hit: resolve to a clean "0 results" state instead of an error.
+      if (controller.signal.aborted) {
+        setResult({ query: searchQuery, lat, lon, shops: [] });
+        setMatchedTags([]);
+        setMatchedBrands([]);
+        setRejected(false);
+        setBrandOnly(false);
+        setTimedOut(true);
+        router.replace(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false });
+        sounds.playEmpty();
+      } else {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+        sounds.playError();
+      }
     } finally {
+      clearTimeout(timeout);
       sounds.stopLoadingLoop();
       setLoading(false);
     }
@@ -288,11 +313,13 @@ function SearchApp() {
 
             {hasSearched && !loading && !error && !hasResults && !rejected && (
               <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2" role="status" aria-live="polite">
-                <p className="text-sm font-medium text-[#141412] mb-1">No shops found for &ldquo;{result.query}&rdquo;</p>
+                <p className="text-sm font-medium text-[#141412] mb-1">
+                  {timedOut ? "0 results found" : `No shops found for “${result.query}”`}
+                </p>
                 <p className="text-xs text-[#6B6A63] leading-relaxed max-w-[260px]">
-                  We looked within {radiusMiles} {radiusMiles === 1 ? "mile" : "miles"}. Clothing listings come from
-                  community OpenStreetMap data, which can be thin in some areas — try a brand name, a broader item,
-                  a larger radius, or a nearby town.
+                  {timedOut
+                    ? "The search took too long to respond (over 30 seconds), so we stopped it. This usually means the map data service is busy — please try again in a moment."
+                    : `We looked within ${radiusMiles} ${radiusMiles === 1 ? "mile" : "miles"}. Clothing listings come from community OpenStreetMap data, which can be thin in some areas — try a brand name, a broader item, a larger radius, or a nearby town.`}
                 </p>
               </div>
             )}
