@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CITIES, getCity } from "@/lib/cities";
 import { FEATURED_BRANDS } from "@/lib/brands";
+import { TOPICS } from "@/lib/topics";
 import { queryNearbyShops, type Shop } from "@/lib/overpass";
 import { PageHeader, PageFooter } from "@/components/SiteChrome";
 import { Container, Section, Kicker } from "@/components/Layout";
@@ -141,8 +142,24 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
           )}
         </section>
 
+        <section>
+          <Kicker index={2} className="text-faint mb-4 block">Shop by category</Kicker>
+          <div className="grid grid-cols-2 sm:grid-cols-3 border-t-2 border-l-2 border-ink">
+            {TOPICS.map((t) => (
+              <Link
+                key={t.slug}
+                href={`/clothes-shops/${c.slug}/${t.slug}`}
+                className="group border-r-2 border-b-2 border-ink p-4 hover:bg-accent transition-colors"
+              >
+                <span className="font-display font-bold text-ink group-hover:text-on-accent">{t.label}</span>
+                <span className="block text-xs text-faint group-hover:text-white/80 mt-0.5">in {c.name}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <section className="pt-8 border-t-2 border-ink">
-          <Kicker index={2} className="text-faint mb-4 block">Popular brands</Kicker>
+          <Kicker index={3} className="text-faint mb-4 block">Popular brands</Kicker>
           <div className="flex flex-wrap gap-2 mb-10">
             {FEATURED_BRANDS.slice(0, 10).map((b) => (
               <Link key={b.slug} href={`/brand/${b.slug}`} className="text-sm font-medium text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">
@@ -150,7 +167,7 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
               </Link>
             ))}
           </div>
-          <Kicker index={3} className="text-faint mb-4 block">Other cities</Kicker>
+          <Kicker index={4} className="text-faint mb-4 block">Other cities</Kicker>
           <div className="flex flex-wrap gap-2">
             {otherCities.map((x) => (
               <Link key={x.slug} href={`/clothes-shops/${x.slug}`} className="text-sm font-medium text-muted hover:text-accent bg-surface hover:bg-panel border border-line px-3 py-1.5 rounded-full transition-colors">

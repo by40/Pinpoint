@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { FEATURED_BRANDS } from "@/lib/brands";
 import { CITIES } from "@/lib/cities";
 import { GUIDES } from "@/lib/guides";
+import { TOPICS } from "@/lib/topics";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pinpointapp.uk";
 
@@ -32,6 +33,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       priority: 0.6,
     })),
+    // City × topic landing pages (e.g. /clothes-shops/manchester/vintage).
+    ...CITIES.flatMap((c) =>
+      TOPICS.map((t) => ({
+        url: `${SITE_URL}/clothes-shops/${c.slug}/${t.slug}`,
+        lastModified: now,
+        changeFrequency: "weekly" as const,
+        priority: 0.55,
+      }))
+    ),
     { url: `${SITE_URL}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${SITE_URL}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
