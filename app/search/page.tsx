@@ -51,8 +51,9 @@ function SearchApp() {
 
   // Hard cap on how long a single search may run before we give up and show
   // "no shops near you" rather than leaving the user staring at a spinner.
-  // Covers the whole flow (initial fetch + the optional auto-widen retry).
-  const SEARCH_TIMEOUT_MS = 20_000;
+  // Covers the whole flow (initial fetch + the optional auto-widen retry); sized
+  // to allow the server's Overpass mirror failover (~24s worst case) to complete.
+  const SEARCH_TIMEOUT_MS = 25_000;
 
   const fetchShops = async (q: string, lat: number, lon: number, miles: number, signal?: AbortSignal) => {
     const radiusM = Math.round(miles * 1609.34);

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveQuery } from "@/lib/categories";
 import { queryNearbyShops } from "@/lib/overpass";
 
+// Allow up to 30s so the Overpass failover (up to ~3 mirrors) can finish instead
+// of the function being killed at the platform default mid-request.
+export const maxDuration = 30;
+
 const MAX_QUERY_LEN = 80;
 
 // Best-effort per-IP rate limit (fixed window). This is an open proxy to the

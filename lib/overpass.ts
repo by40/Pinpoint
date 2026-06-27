@@ -110,14 +110,19 @@ function buildQuery(
   const around = `(around:${radius},${lat},${lon})`;
   const parts: string[] = [];
 
-  for (const t of shopTypes) {
-    parts.push(`  node["shop"="${t}"]${around};`);
-    parts.push(`  way["shop"="${t}"]${around};`);
+  // Combine all shop types into ONE regex alternation per element kind rather
+  // than a separate clause each. A search like "Nike" can resolve to several
+  // shop types; emitting 2 clauses per type makes Overpass plan a big union that
+  // is slow (and times out) in dense areas. One `shop~"^(a|b|c)$"` is far cheaper.
+  if (shopTypes.length) {
+    const re = `^(${shopTypes.map(escapeQL).join("|")})$`;
+    parts.push(`  node["shop"~"${re}"]${around};`);
+    parts.push(`  way["shop"~"${re}"]${around};`);
   }
-  for (const b of brands) {
-    const bb = escapeQL(b);
-    parts.push(`  node["brand"~"${bb}",i]${around};`);
-    parts.push(`  way["brand"~"${bb}",i]${around};`);
+  if (brands.length) {
+    const re = `(${brands.map(escapeQL).join("|")})`;
+    parts.push(`  node["brand"~"${re}",i]${around};`);
+    parts.push(`  way["brand"~"${re}",i]${around};`);
   }
   if (nameTerm) {
     // Constrain name matches to clothing-type shops, so an unknown query like
@@ -128,7 +133,7 @@ function buildQuery(
     parts.push(`  way["shop"~"${types}"]["name"~"${nn}",i]${around};`);
   }
 
-  return `[out:json][timeout:25];\n(\n${parts.join("\n")}\n);\nout center tags;`;
+  return `[out:json][timeout:20];\n(\n${parts.join("\n")}\n);\nout center tags;`;
 }
 
 // Shop types considered "clothing/fashion" — used to keep name-based matches
@@ -140,11 +145,17 @@ const NAME_MATCH_SHOP_TYPES = [
 ];
 
 // Public Overpass mirrors, tried in order. The public endpoints are heavily
-// rate-limited and occasionally down, so we fail over between them.
+// rate-limited and occasionally down, so we fail over between them. kumi.systems
+// is generally the fastest/most lenient for server-side callers, so it leads.
 const OVERPASS_ENDPOINTS = [
-  "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
 ];
+
+// Per-request abort. Since mirrors are raced in parallel, overall latency is the
+// fastest responder; this just caps how long we'll wait before giving up on all.
+const PER_REQUEST_TIMEOUT_MS = 9000;
 
 // Identify the app politely per Overpass etiquette, with a contact URL.
 const USER_AGENT = "Pinpoint/1.0 (+https://pinpointapp.uk; local shop finder)";
@@ -164,37 +175,34 @@ function cacheKey(resolved: ResolvedQuery, lat: number, lon: number, radius: num
   return `t:${types}|b:${brands}|n:${name}|${lat.toFixed(3)}|${lon.toFixed(3)}|${radius}`;
 }
 
-// POST a query to the Overpass mirrors with one retry and endpoint failover.
+// Query all Overpass mirrors in parallel and take the FIRST successful response
+// (Promise.any). Public mirrors are individually slow/rate-limited, especially
+// for a shared server IP; racing them means one busy mirror can't stall the
+// request — overall latency becomes the *fastest* mirror, not the sum. Losing
+// requests self-abort at PER_REQUEST_TIMEOUT_MS.
 async function runOverpass(ql: string): Promise<OverpassResponse> {
-  let lastErr: unknown;
-  for (const endpoint of OVERPASS_ENDPOINTS) {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Accept": "application/json, */*",
-            "User-Agent": USER_AGENT,
-          },
-          body: `data=${encodeURIComponent(ql)}`,
-          signal: AbortSignal.timeout(20000),
-        });
-        // 429 (rate limited) and 504 (gateway timeout) are worth retrying/failing over.
-        if (res.status === 429 || res.status === 504) {
-          lastErr = new Error(`Overpass busy: ${res.status}`);
-          await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
-          continue;
-        }
-        if (!res.ok) throw new Error(`Overpass error: ${res.status}`);
-        return (await res.json()) as OverpassResponse;
-      } catch (err) {
-        lastErr = err;
-        await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
-      }
-    }
+  const body = `data=${encodeURIComponent(ql)}`;
+  const attempts = OVERPASS_ENDPOINTS.map(async (endpoint) => {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json, */*",
+        "User-Agent": USER_AGENT,
+      },
+      body,
+      signal: AbortSignal.timeout(PER_REQUEST_TIMEOUT_MS),
+    });
+    if (!res.ok) throw new Error(`Overpass ${res.status} @ ${endpoint}`);
+    return (await res.json()) as OverpassResponse;
+  });
+
+  try {
+    return await Promise.any(attempts);
+  } catch {
+    // AggregateError → every mirror failed/timed out.
+    throw new Error("Overpass unavailable");
   }
-  throw lastErr instanceof Error ? lastErr : new Error("Overpass unavailable");
 }
 
 export async function queryNearbyShops(
