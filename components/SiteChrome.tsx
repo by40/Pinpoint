@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Marquee from "@/components/Marquee";
 import { Container } from "@/components/Layout";
 
@@ -26,6 +26,29 @@ const NAV = [
 // about). The interactive app screens keep their own compact headers.
 export function PageHeader() {
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // While the mobile menu is open: lock body scroll, move focus into the menu,
+  // and let Escape close it (returning focus to the toggle) — keyboard a11y.
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    menuRef.current?.querySelector<HTMLElement>("a")?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   return (
     <header className="sticky top-0 z-50">
@@ -60,9 +83,11 @@ export function PageHeader() {
 
           {/* Mobile toggle */}
           <button
+            ref={toggleRef}
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
+            aria-controls="mobile-menu"
             className="md:hidden w-9 h-9 -mr-1 flex items-center justify-center text-ink"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -74,7 +99,7 @@ export function PageHeader() {
 
       {/* Mobile overlay menu */}
       {open && (
-        <div className="md:hidden border-b-2 border-ink bg-bg">
+        <div ref={menuRef} id="mobile-menu" className="md:hidden border-b-2 border-ink bg-bg">
           <Container size="wide" className="py-4 flex flex-col gap-1">
             {NAV.map((n) => (
               <Link

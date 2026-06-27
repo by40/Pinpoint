@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useMemo, useEffect, Suspense } from "rea
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import { track } from "@vercel/analytics";
 import SearchBar from "@/components/SearchBar";
 import ShopCard from "@/components/ShopCard";
@@ -476,7 +476,9 @@ function SearchApp() {
 export default function SearchPage() {
   return (
     <Suspense>
-      <SearchApp />
+      <MotionConfig reducedMotion="user">
+        <SearchApp />
+      </MotionConfig>
     </Suspense>
   );
 }

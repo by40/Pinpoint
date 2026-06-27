@@ -4,6 +4,8 @@ export const metadata: Metadata = {
   title: "Outfit List",
   description: "Add every piece of an outfit, then find local shops for all of it at once — each mapped and sorted by distance.",
   alternates: { canonical: "/wishlist" },
+  // Interactive app state, not indexable content.
+  robots: { index: false, follow: true },
   openGraph: {
     title: "Outfit List · Pinpoint",
     description: "Add every piece of an outfit, then find local shops for all of it at once.",

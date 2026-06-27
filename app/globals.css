@@ -10,7 +10,7 @@
   --color-surface: #ffffff;     /* cards */
   --color-ink: #15131c;         /* primary text */
   --color-muted: #5c5968;       /* secondary text */
-  --color-faint: #8a8794;       /* tertiary text, placeholders, disabled */
+  --color-faint: #6c6976;       /* tertiary text, placeholders (WCAG AA: 5.36:1 on white) */
   --color-line: #e7e5ef;        /* borders / dividers */
 
   --color-accent: #6b2bf2;      /* vivid violet — CTAs, brand, active */

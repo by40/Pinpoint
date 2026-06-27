@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import { track } from "@vercel/analytics";
 import ShopCard from "@/components/ShopCard";
 import SoundToggle from "@/components/SoundToggle";
@@ -212,6 +212,7 @@ export default function WishlistPage() {
   );
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="flex flex-col min-h-[100dvh] md:h-screen bg-bg text-ink overflow-x-hidden md:overflow-hidden">
       {/* Header */}
       <header className="shrink-0 px-5 py-3 border-b-2 border-ink flex items-center gap-3 bg-surface sticky top-0 z-30 md:static">
@@ -612,5 +613,6 @@ export default function WishlistPage() {
         </div>
       </div>
     </div>
+    </MotionConfig>
   );
 }

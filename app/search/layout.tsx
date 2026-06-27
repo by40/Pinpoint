@@ -4,6 +4,8 @@ export const metadata: Metadata = {
   title: "Search",
   description: "Search a clothing brand or item and instantly see nearby shops likely to sell it on an interactive 3D map, sorted by distance.",
   alternates: { canonical: "/search" },
+  // Interactive app state, not indexable content — avoid indexing every ?q= permutation.
+  robots: { index: false, follow: true },
   openGraph: {
     title: "Search · Pinpoint",
     description: "Search a clothing brand or item and instantly see nearby shops likely to sell it on an interactive 3D map.",

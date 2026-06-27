@@ -9,20 +9,24 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
   weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 // Body face — Plus Jakarta Sans: clean, modern, friendlier than the default Inter.
+// Only 400–700 are used (no font-extrabold), so 800 is dropped to trim payload.
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
-// Mono retained only as a small numeric/stat accent.
+// Mono retained only as a small numeric/stat accent (kicker labels use 500).
 const ibmMono = IBM_Plex_Mono({
   variable: "--font-ibm",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
+  display: "swap",
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pinpointapp.uk";
