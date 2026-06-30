@@ -49,6 +49,16 @@ function SearchApp() {
     setRadiusMiles(m);
   };
 
+  // "items" = the default likely-stockist search; "shops" = exact shop-name search.
+  const [searchMode, setSearchMode] = useState<"items" | "shops">(
+    searchParams.get("mode") === "shops" ? "shops" : "items"
+  );
+  const searchModeRef = useRef<"items" | "shops">(searchMode);
+  const setMode = (m: "items" | "shops") => {
+    searchModeRef.current = m;
+    setSearchMode(m);
+  };
+
   // Hard cap on how long a single search may run before we give up and show
   // "no shops near you" rather than leaving the user staring at a spinner.
   // Covers the whole flow (initial fetch + the optional auto-widen retry); sized
@@ -57,8 +67,9 @@ function SearchApp() {
 
   const fetchShops = async (q: string, lat: number, lon: number, miles: number, signal?: AbortSignal) => {
     const radiusM = Math.round(miles * 1609.34);
+    const modeParam = searchModeRef.current === "shops" ? "&mode=shops" : "";
     const res = await fetch(
-      `/api/shops?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&radius=${radiusM}`,
+      `/api/shops?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&radius=${radiusM}${modeParam}`,
       { signal }
     );
     const data = await res.json();
@@ -79,6 +90,8 @@ function SearchApp() {
     sounds.startLoadingLoop();
 
     const baseMiles = radiusMilesRef.current;
+    const mode = searchModeRef.current;
+    const modeQ = mode === "shops" ? "&mode=shops" : "";
 
     // Abort the in-flight request(s) once the 30s budget is spent.
     const controller = new AbortController();
@@ -105,9 +118,9 @@ function SearchApp() {
       setRejected(data.rejected ?? false);
       setBrandOnly(false);
       // Reflect the query in the URL so the search is shareable/bookmarkable.
-      router.replace(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false });
+      router.replace(`/search?q=${encodeURIComponent(searchQuery)}${modeQ}`, { scroll: false });
       if (data.rejected) track("search_rejected", { q: searchQuery });
-      else track("search", { q: searchQuery, results: data.shops?.length ?? 0 });
+      else track("search", { q: searchQuery, results: data.shops?.length ?? 0, mode });
       if ((data.shops?.length ?? 0) > 0) sounds.playSuccess();
       else sounds.playEmpty();
     } catch (err) {
@@ -119,8 +132,8 @@ function SearchApp() {
         setRejected(false);
         setBrandOnly(false);
         setTimedOut(true);
-        router.replace(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false });
-        track("search_timeout", { q: searchQuery });
+        router.replace(`/search?q=${encodeURIComponent(searchQuery)}${modeQ}`, { scroll: false });
+        track("search_timeout", { q: searchQuery, mode });
         sounds.playEmpty();
       } else {
         setError(err instanceof Error ? err.message : "Something went wrong");
@@ -183,9 +196,10 @@ function SearchApp() {
 
   async function shareSearch() {
     if (typeof window === "undefined" || !result) return;
-    const url = `${window.location.origin}/search?q=${encodeURIComponent(result.query)}`;
+    const modeQ = searchMode === "shops" ? "&mode=shops" : "";
+    const url = `${window.location.origin}/search?q=${encodeURIComponent(result.query)}${modeQ}`;
     const data = { title: "Pinpoint", text: `Find "${result.query}" in shops near you`, url };
-    track("share", { q: result.query });
+    track("share", { q: result.query, mode: searchMode });
     try {
       if (navigator.share) await navigator.share(data);
       else {
@@ -226,7 +240,42 @@ function SearchApp() {
         {/* Left panel */}
         <div className="w-full md:w-[400px] md:shrink-0 flex flex-col md:border-r border-line md:overflow-hidden bg-panel">
           <div className="p-4 border-b border-line bg-surface space-y-3">
-            <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} loading={loading} />
+            <SearchBar
+              value={query}
+              onChange={setQuery}
+              onSearch={handleSearch}
+              loading={loading}
+              placeholder={searchMode === "shops" ? "Search a shop… e.g. JD Sports" : undefined}
+            />
+
+            {/* Search mode toggle: likely-stockist search vs exact shop-name search */}
+            <div>
+              <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-panel border border-line" role="group" aria-label="Search mode">
+                {([["items", "Brands & items"], ["shops", "Shops"]] as const).map(([m, label]) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => {
+                      if (searchModeRef.current === m) return;
+                      setMode(m);
+                      sounds.playTick();
+                      if (result) handleSearch(result.query, result.lat, result.lon);
+                    }}
+                    aria-pressed={searchMode === m}
+                    className={`text-xs font-semibold px-3 py-2 rounded-lg transition-colors ${
+                      searchMode === m ? "bg-accent text-on-accent" : "bg-surface text-muted hover:text-ink"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-faint mt-1.5">
+                {searchMode === "shops"
+                  ? "Find a specific shop by name — only that shop shows."
+                  : "Find shops likely to sell a brand or item."}
+              </p>
+            </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
@@ -347,11 +396,17 @@ function SearchApp() {
             {hasSearched && !loading && !error && !hasResults && !rejected && (
               <div className="flex flex-col items-center justify-center min-h-[50vh] md:h-full text-center py-12 px-2" role="status" aria-live="polite">
                 <p className="text-sm font-medium text-ink mb-1">
-                  {timedOut ? "No shops near you" : `No shops found for “${result.query}”`}
+                  {timedOut
+                    ? "No shops near you"
+                    : searchMode === "shops"
+                    ? `No shops called “${result.query}” nearby`
+                    : `No shops found for “${result.query}”`}
                 </p>
                 <p className="text-xs text-faint leading-relaxed max-w-[260px]">
                   {timedOut
                     ? "We couldn’t find anything nearby in time. Please try again, widen your search radius, or try a nearby town."
+                    : searchMode === "shops"
+                    ? `We looked within ${radiusMiles} ${radiusMiles === 1 ? "mile" : "miles"} for a clothing shop with that name. Check the spelling, try a larger radius, or switch to “Brands & items”.`
                     : `We looked within ${radiusMiles} ${radiusMiles === 1 ? "mile" : "miles"}. Clothing listings come from community OpenStreetMap data, which can be thin in some areas — try a brand name, a broader item, a larger radius, or a nearby town.`}
                 </p>
               </div>
@@ -370,12 +425,18 @@ function SearchApp() {
                   <div className="flex items-center justify-between gap-2 pb-1">
                     <p className="text-xs text-faint" role="status" aria-live="polite" aria-atomic="true">
                       <span className="text-ink font-semibold">{shownShops.length}</span>{" "}
-                      {brandOnly ? "confirmed stockists" : "shops that may stock this"}
-                      {!brandOnly && matchedBrands.length > 0 ? (
-                        <span> · <span className="text-ink">{matchedBrands.slice(0, 3).join(", ")}</span></span>
-                      ) : !brandOnly && matchedTags.length > 0 ? (
-                        <span> · {matchedTags.slice(0, 3).join(", ")}</span>
-                      ) : null}
+                      {searchMode === "shops" ? (
+                        <>shops named “{result.query}”</>
+                      ) : (
+                        <>
+                          {brandOnly ? "confirmed stockists" : "shops that may stock this"}
+                          {!brandOnly && matchedBrands.length > 0 ? (
+                            <span> · <span className="text-ink">{matchedBrands.slice(0, 3).join(", ")}</span></span>
+                          ) : !brandOnly && matchedTags.length > 0 ? (
+                            <span> · {matchedTags.slice(0, 3).join(", ")}</span>
+                          ) : null}
+                        </>
+                      )}
                     </p>
                     <button
                       onClick={shareSearch}
@@ -389,9 +450,9 @@ function SearchApp() {
                     </button>
                   </div>
 
-                  {(matchedBrands.length > 0 && stockistCount > 0) || openCount > 0 ? (
+                  {(searchMode === "items" && matchedBrands.length > 0 && stockistCount > 0) || openCount > 0 ? (
                     <div className="flex flex-wrap gap-2">
-                      {matchedBrands.length > 0 && stockistCount > 0 && (
+                      {searchMode === "items" && matchedBrands.length > 0 && stockistCount > 0 && (
                         <button
                           onClick={() => {
                             setBrandOnly((v) => !v);

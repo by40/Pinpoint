@@ -10,9 +10,10 @@ interface Props {
   loading: boolean;
   value?: string;
   onChange?: (v: string) => void;
+  placeholder?: string;
 }
 
-export default function SearchBar({ onSearch, loading, value: controlledValue, onChange }: Props) {
+export default function SearchBar({ onSearch, loading, value: controlledValue, onChange, placeholder }: Props) {
   const [internal, setInternal] = useState(controlledValue ?? "");
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +86,7 @@ export default function SearchBar({ onSearch, loading, value: controlledValue, o
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             maxLength={80}
-            placeholder="Search a brand or item… e.g. Nike trainers"
+            placeholder={placeholder ?? "Search a brand or item… e.g. Nike trainers"}
             className="w-full bg-surface border border-line text-ink placeholder-faint rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/25 transition-colors"
           />
         </div>

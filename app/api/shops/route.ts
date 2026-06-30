@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { resolveQuery } from "@/lib/categories";
+import { resolveQuery, resolveShopQuery } from "@/lib/categories";
 import { queryNearbyShops } from "@/lib/overpass";
 
 // Allow up to 30s so the Overpass failover (up to ~3 mirrors) can finish instead
@@ -51,6 +51,8 @@ export async function GET(req: NextRequest) {
   const lat = parseFloat(searchParams.get("lat") ?? "");
   const lon = parseFloat(searchParams.get("lon") ?? "");
   const radius = Math.min(parseInt(searchParams.get("radius") ?? "3000"), 20000);
+  // "shops" mode searches by shop NAME only (exact store, no stockist expansion).
+  const shopsMode = searchParams.get("mode") === "shops";
 
   if (!q) return NextResponse.json({ error: "Missing query" }, { status: 400 });
   if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
@@ -58,7 +60,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const resolved = resolveQuery(q);
+    const resolved = shopsMode ? resolveShopQuery(q) : resolveQuery(q);
     // Non-clothing search → tell the client so it can show a "clothing only" note.
     if (resolved.rejected) {
       return NextResponse.json(

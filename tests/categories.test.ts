@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveQuery } from "@/lib/categories";
+import { resolveQuery, resolveShopQuery } from "@/lib/categories";
 
 describe("resolveQuery", () => {
   it("rejects clearly non-clothing searches", () => {
@@ -50,5 +50,33 @@ describe("resolveQuery", () => {
     expect(r).toHaveProperty("nameMatch");
     expect(Array.isArray(r.shopTypes)).toBe(true);
     expect(Array.isArray(r.brands)).toBe(true);
+  });
+});
+
+describe("resolveShopQuery (Shops mode)", () => {
+  it("searches by name only — no broad shop-type expansion", () => {
+    const r = resolveShopQuery("the cool shop");
+    expect(r.shopTypes).toEqual([]); // key: no stockist expansion
+    expect(r.nameMatch).toBe("the cool shop");
+    expect(r.matched).toBe(true);
+  });
+
+  it("includes the recognised brand so official stores match by brand= too", () => {
+    const r = resolveShopQuery("nike");
+    expect(r.shopTypes).toEqual([]);
+    expect(r.nameMatch).toBe("nike");
+    expect(r.brands).toContain("Nike");
+  });
+
+  it("never rejects — an unmatched/non-clothing name just returns a name search", () => {
+    const r = resolveShopQuery("tesco");
+    expect(r.rejected).toBeFalsy();
+    expect(r.matched).toBe(true);
+    expect(r.nameMatch).toBe("tesco");
+    expect(r.shopTypes).toEqual([]);
+  });
+
+  it("trims the name", () => {
+    expect(resolveShopQuery("  zara  ").nameMatch).toBe("zara");
   });
 });

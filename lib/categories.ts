@@ -215,3 +215,22 @@ export function resolveQuery(query: string): ResolvedQuery {
     nameMatch: null,
   };
 }
+
+// "Shops mode": treat the query as a shop/store NAME and return only shops that
+// match it — no broad shop-type expansion. We still include the recognised brand
+// (if any) so an official store also matches by brand= (e.g. "Nike" → Nike-branded
+// stores AND shops named "Nike"), but nothing else. Name matching stays scoped to
+// clothing/fashion shop types in buildQuery (NAME_MATCH_SHOP_TYPES). Never rejects:
+// an unmatched name simply returns no results.
+export function resolveShopQuery(query: string): ResolvedQuery {
+  const brands = new Set<string>();
+  for (const entry of BRAND_MAP) {
+    if (entry.brand && entry.patterns.test(query)) brands.add(entry.brand);
+  }
+  return {
+    shopTypes: [],
+    brands: Array.from(brands),
+    matched: true,
+    nameMatch: query.trim(),
+  };
+}
